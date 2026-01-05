@@ -1,0 +1,195 @@
+{{ block title }}
+    Task: Go / No-Go
+{{ endblock }}
+
+{{ block content }}
+
+<style>
+  /* Container for centering and clean layout */
+  .task-container {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 20px;
+  }
+
+  /* The stimulus (letter) display */
+  #stimulus-screen {
+      font-size: 180px;
+      font-weight: bold;
+      height: 300px;
+      display: flex; /* Flexbox for perfect centering */
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      margin-bottom: 20px;
+      border: 1px solid #eee;
+      background-color: #fafafa;
+      display: none; /* Initially hidden */
+  }
+
+  .instructions {
+      margin-bottom: 30px;
+      font-size: 1.2rem;
+      text-align: left;
+      background: #e9ecef;
+      padding: 20px;
+      border-radius: 5px;
+  }
+
+  .status-bar {
+      font-size: 14px;
+      color: #666;
+      margin-top: 10px;
+      display: none;
+  }
+
+  button.btn-start {
+      font-size: 1.2rem;
+      padding: 15px 30px;
+  }
+</style>
+
+<div class="task-container">
+
+    <div id="instruction-block">
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <ul>
+                <li>Letters will appear one by one on the screen.</li>
+                <li>Press <b>SPACE</b> as fast as possible for every letter.</li>
+                <li><b>EXCEPTION:</b> Do <span style="color:red; font-weight:bold;">NOT</span> press for the letter <b>{{ NO_GO_LETTER }}</b>.</li>
+            </ul>
+        </div>
+        <button type="button" id="startBtn" class="btn btn-primary btn-start">Start Task</button>
+    </div>
+
+    <div id="stimulus-screen"></div>
+    <div class="status-bar" id="status-bar">
+        Press SPACE quickly! Avoid "{{ NO_GO_LETTER }}".
+    </div>
+
+    <input type="hidden" name="task_data_json" id="task_data_json">
+    <input type="hidden" name="time_started_iso" id="time_started_iso">
+    <input type="hidden" name="time_finished_iso" id="time_finished_iso">
+
+</div>
+
+<script>
+    // Data passed from Python
+    const TRIALS = {{ TRIALS|json }};
+    const STIM_MS = {{ STIM_DURATION_MS|json }};
+    const RESPONSE_KEY = {{ RESPONSE_KEY|json }};
+
+    // DOM Elements
+    const screen = document.getElementById('stimulus-screen');
+    const instructionBlock = document.getElementById('instruction-block');
+    const statusBar = document.getElementById('status-bar');
+
+    // State variables
+    let results = [];
+    let currentTrialIndex = 0;
+    let isAwaitingResponse = false;
+    let trialStartTimePerf = 0;
+    let hasRespondedInTrial = false;
+
+    function now() { return performance.now(); }
+
+    // --- Core Logic ---
+
+    function startTask() {
+        // Switch UI
+        instructionBlock.style.display = 'none';
+        screen.style.display = 'flex';
+        statusBar.style.display = 'block';
+
+        // Set start timestamp
+        document.getElementById('time_started_iso').value = new Date().toISOString();
+
+        // Start first trial after short delay
+        setTimeout(runNextTrial, 1000);
+    }
+
+    function runNextTrial() {
+        // Check if finished
+        if (currentTrialIndex >= TRIALS.length) {
+            finishTask();
+            return;
+        }
+
+        const trialData = TRIALS[currentTrialIndex];
+
+        // Reset for new trial
+        hasRespondedInTrial = false;
+        isAwaitingResponse = true;
+
+        // Show stimulus
+        screen.textContent = trialData.letter;
+        trialStartTimePerf = now();
+        const stimOnsetUnix = Date.now();
+
+        // Prepare result object
+        const resultEntry = {
+            trial_id: trialData.trial_id,
+            letter: trialData.letter,
+            is_no_go: trialData.is_no_go,
+            isi_ms: trialData.isi_ms,
+            stim_onset_unix: stimOnsetUnix,
+            responded: false,
+            rt_ms: null,
+            response_unix: null,
+            all_keypresses: 0
+        };
+        results.push(resultEntry);
+
+        // Hide stimulus after exposure duration
+        setTimeout(() => {
+            screen.textContent = '';
+        }, STIM_MS);
+
+        // Schedule next trial (after ISI)
+        setTimeout(() => {
+            isAwaitingResponse = false;
+            currentTrialIndex++;
+            runNextTrial();
+        }, trialData.isi_ms);
+    }
+
+    // --- Event Listeners ---
+
+    document.getElementById('startBtn').addEventListener('click', startTask);
+
+    window.addEventListener('keydown', (ev) => {
+        if (!isAwaitingResponse) return;
+
+        // Track Space key
+        if (ev.key === RESPONSE_KEY || ev.code === "Space") {
+            const currentResult = results[results.length - 1];
+            currentResult.all_keypresses += 1;
+
+            if (!hasRespondedInTrial) {
+                // Only record the first response per trial
+                hasRespondedInTrial = true;
+                const rt = Math.round(now() - trialStartTimePerf);
+
+                currentResult.responded = true;
+                currentResult.rt_ms = rt;
+                currentResult.response_unix = Date.now();
+            }
+        }
+    });
+
+    function finishTask() {
+        screen.style.display = 'none';
+        statusBar.innerHTML = "Task finished. Saving data...";
+
+        // Write data to hidden fields
+        document.getElementById('task_data_json').value = JSON.stringify(results);
+        document.getElementById('time_finished_iso').value = new Date().toISOString();
+
+        // Submit form
+        document.querySelector('form').submit();
+    }
+
+</script>
+{{ endblock }}
