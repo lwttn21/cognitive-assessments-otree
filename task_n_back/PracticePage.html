@@ -1,0 +1,184 @@
+{{ block title }}Practice Round: {{ n }}-Back Task{{ endblock }}
+
+{{ block content }}
+<style>
+    /* General Layout */
+    .task-container { max-width: 800px; margin: 0 auto; text-align: center; padding: 20px; }
+    .stimulus-display { font-size: 120px; font-weight: bold; height: 150px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10; margin-bottom: 20px; }
+    .feedback { font-size: 24px; font-weight: bold; margin-top: 10px; height: 30px; }
+
+    /* Visual Aid: Memory history row */
+    .history-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+        height: 100px;
+        gap: 15px;
+        min-height: 100px;
+    }
+
+    /* Individual history letter boxes */
+    .history-item {
+        width: 60px; height: 60px; line-height: 60px;
+        background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 8px;
+        font-size: 30px; font-weight: bold; text-align: center;
+        flex-shrink: 0;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease-out;
+    }
+
+    /* Highlight for the target letter (n positions back) */
+    .history-item.n-back-target {
+        border: 3px solid #ffc107;
+        background-color: #fff3cd;
+    }
+
+    .feedback.correct { color: #28a745; }
+    .feedback.incorrect { color: #dc3545; }
+    .start-btn-container { margin-top: 30px; }
+
+    /* Hide oTree standard elements initially */
+    .otree-debug-info { display: none !important; }
+    .otree-form-field { display: none; }
+</style>
+
+<div class="task-container">
+    <div id="practice-content">
+        <p>This is a practice round. You will receive immediate feedback.</p>
+        <p>
+        To help you learn, a <strong>history list</strong> of the previous letters is displayed below the current letter.
+        The target letter (from {{ n }} positions ago) is highlighted in yellow.
+        </p>
+        <p>Rule: Press the <strong>SPACEBAR</strong> if the current letter matches the letter from <strong>{{ n }} position(s)</strong> ago.</p>
+
+        <div id="stimulus-display" class="stimulus-display"></div>
+        <div id="feedback-display" class="feedback"></div>
+        <div class="history-container" id="history-container"></div>
+
+        <div class="start-btn-container">
+            <button type="button" id="startPracticeBtn" class="btn btn-primary btn-lg">Start Practice</button>
+        </div>
+    </div>
+
+    <div id="final-screen" style="display: none; padding: 50px;">
+        <h2 style="margin-bottom: 30px;">Practice Completed!</h2>
+        <div class="otree-form-field" style="display: block !important; margin-top: 30px;">
+            {{ next_button }}
+        </div>
+    </div>
+
+    <input type="hidden" name="dummy_field" value="1">
+</div>
+
+<script>
+    const trials = {{ trials|json }};
+    const n = {{ n|json }};
+    const stimMs = {{ stim_ms|json }};
+    const isiMs = {{ isi_ms|json }};
+
+    let currentIdx = 0;
+    let sequence = [];
+    let canRespond = false;
+    let trialStartTime;
+    let currentTrialResult = { responded: false, rt: null };
+
+    const stimulusDisplay = document.getElementById('stimulus-display');
+    const feedbackDisplay = document.getElementById('feedback-display');
+    const historyContainer = document.getElementById('history-container');
+    const startPracticeBtn = document.getElementById('startPracticeBtn');
+    const practiceContent = document.getElementById('practice-content');
+    const finalScreen = document.getElementById('final-screen');
+
+    function toggleOtreeControl(show) {
+        const nextBtn = document.querySelector('.otree-next-button');
+        const displayValue = show ? 'inline-block' : 'none';
+        if (nextBtn) nextBtn.style.display = displayValue;
+    }
+
+    function updateHistoryDisplay() {
+        historyContainer.innerHTML = '';
+        if (sequence.length <= 1) return;
+
+        const displaySequence = [...sequence].reverse().slice(1, n + 1);
+
+        displaySequence.forEach((char, index) => {
+            const item = document.createElement('div');
+            item.classList.add('history-item');
+            item.innerText = char;
+
+            if (index === n - 1) {
+                item.classList.add('n-back-target');
+            }
+            historyContainer.appendChild(item);
+        });
+    }
+
+    function showNextTrial() {
+        if (currentIdx >= trials.length) {
+            practiceContent.style.display = 'none';
+            finalScreen.style.display = 'block';
+            toggleOtreeControl(true);
+            return;
+        }
+
+        const trial = trials[currentIdx];
+        sequence.push(trial.letter);
+        currentTrialResult = { responded: false, rt: null };
+
+        stimulusDisplay.innerText = trial.letter;
+        feedbackDisplay.innerText = '';
+        canRespond = true;
+        trialStartTime = performance.now();
+
+        updateHistoryDisplay();
+
+        setTimeout(() => {
+            stimulusDisplay.innerText = '';
+            processTrialResponse(trial);
+        }, stimMs);
+
+        setTimeout(() => {
+            canRespond = false;
+            currentIdx++;
+            showNextTrial();
+        }, isiMs);
+    }
+
+    function processTrialResponse(trial) {
+        let feedbackClass = '';
+        let feedbackText = '';
+
+        const hit = trial.is_match && currentTrialResult.responded;
+        const falseAlarm = !trial.is_match && currentTrialResult.responded;
+        const correctReject = !trial.is_match && !currentTrialResult.responded;
+        const miss = trial.is_match && !currentTrialResult.responded;
+
+        // Feedback messages in English
+        if (hit) { feedbackText = 'Correct!'; feedbackClass = 'correct'; }
+        else if (falseAlarm) { feedbackText = 'Incorrect! Do not press.'; feedbackClass = 'incorrect'; }
+        else if (correctReject) { feedbackText = 'Correct!'; feedbackClass = 'correct'; }
+        else if (miss) { feedbackText = 'Incorrect! You missed a match.'; feedbackClass = 'incorrect'; }
+
+        feedbackDisplay.innerText = feedbackText;
+        feedbackDisplay.className = 'feedback ' + feedbackClass;
+    }
+
+    startPracticeBtn.addEventListener('click', () => {
+        startPracticeBtn.style.display = 'none';
+        showNextTrial();
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && canRespond && !currentTrialResult.responded) {
+            currentTrialResult.responded = true;
+            currentTrialResult.rt = Math.round(performance.now() - trialStartTime);
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleOtreeControl(false);
+    });
+</script>
+{{ endblock }}

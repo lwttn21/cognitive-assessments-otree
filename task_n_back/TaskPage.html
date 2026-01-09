@@ -1,0 +1,69 @@
+{{ block title }}N-Back Task (n = {{ n }}){{ endblock }}
+{{ block content }}
+<style>
+    .stimulus { font-size: 120px; font-weight: bold; text-align: center; height: 200px; display: flex; align-items: center; justify-content: center; }
+</style>
+
+<div class="stimulus" id="stimulus-display"></div>
+
+<input type="hidden" name="task_data_json" id="task_data_json">
+
+<script>
+    const trials = {{ trials|json }};
+    const stimMs = {{ stim_ms|json }};
+    const isiMs = {{ isi_ms|json }};
+    const n = {{ n|json }};
+    
+    let currentIdx = 0;
+    let results = [];
+    let canRespond = false;
+    let startTime;
+
+    function showNext() {
+        if (currentIdx >= trials.length) {
+            document.getElementById('task_data_json').value = JSON.stringify(results);
+            document.forms[0].submit();
+            return;
+        }
+
+        let trial = trials[currentIdx];
+        let display = document.getElementById('stimulus-display');
+        
+        display.innerText = trial.letter;
+        canRespond = true;
+        startTime = performance.now();
+        
+        let resultEntry = {
+            trial_id: trial.trial_id,
+            letter: trial.letter,
+            is_match: trial.is_match,
+            responded: false,
+            rt: null
+        };
+        results.push(resultEntry);
+
+        // Nach Ablauf der Anzeigezeit Buchstaben verstecken
+        setTimeout(() => { display.innerText = ''; }, stimMs);
+        
+        // Nach Ablauf des Gesamt-Intervalls (ISI) zum nächsten Trial
+        setTimeout(() => {
+            canRespond = false;
+            currentIdx++;
+            showNext();
+        }, isiMs);
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && canRespond) {
+            let currentResult = results[currentIdx];
+            if (!currentResult.responded) {
+                currentResult.responded = true;
+                currentResult.rt = Math.round(performance.now() - startTime);
+            }
+        }
+    });
+
+    // Start nach kurzem Delay
+    setTimeout(showNext, 1000);
+</script>
+{{ endblock }}

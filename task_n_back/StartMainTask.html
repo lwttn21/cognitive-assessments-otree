@@ -1,0 +1,24 @@
+{{ block title }}Ready for the Real Test?{{ endblock }}
+
+{{ block content }}
+<div class="card" style="padding: 20px; border-left: 5px solid #007bff; margin-top: 20px;">
+    <p>The practice session is now complete.</p>
+
+    <div class="alert alert-warning" style="background-color: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <strong>Attention:</strong> In the following main test, the previous letters will
+        <strong>no longer be displayed</strong> at the bottom of the screen. You must keep them in your mind.
+        <p>Furthermore, you will <strong>no longer</strong> receive direct feedback on your responses!</p>
+    </div>
+
+    <p>Click the button below when you are ready to start the assessment.</p>
+</div>
+
+<div style="text-align: right; margin-top: 20px;">
+    {{ next_button }}
+</div>
+
+<style>
+    /* Ensures a clean look by hiding oTree debug info */
+    .otree-debug-info { display: none !important; }
+</style>
+{{ endblock }}

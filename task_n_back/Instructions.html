@@ -1,0 +1,35 @@
+{{ block title }}
+    Instructions: {{ n }}-Back Task
+{{ endblock }}
+
+{{ block content }}
+<div class="card debug-fill-variable" style="padding: 20px;">
+    <p>
+        In this experiment, you will see a series of letters appearing one after another.
+    </p>
+    <p>
+        Your task is to determine whether the current letter is the same as the one you saw
+        <strong>{{ n }} position(s)</strong> ago.
+    </p>
+
+    <div class="alert alert-info">
+        <strong>Rule:</strong> Press the <b>SPACEBAR</b> if the current letter matches the letter from {{ n }} step(s) back.
+    </div>
+
+    <ul>
+        <li>If a letter appears that does NOT match, do <b>not</b> press any key.</li>
+        <li>Try to respond as quickly and as accurately as possible.</li>
+    </ul>
+
+    <p>Please place your finger on the spacebar now and click "Next" when you are ready to begin.</p>
+</div>
+
+<div style="text-align: right; margin-top: 20px;">
+    {{ next_button }}
+</div>
+
+<style>
+    /* Ensures the standard oTree debug info is hidden for a cleaner look */
+    .otree-debug-info { display: none !important; }
+</style>
+{{ endblock }}

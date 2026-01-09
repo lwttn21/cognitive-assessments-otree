@@ -6,7 +6,14 @@ SESSION_CONFIGS = [
         app_sequence=['task_go_no_go'],
         num_demo_participants=1,
     ),
+    dict(
+        name='n_back_test',
+        display_name="N-Back Task",
+        app_sequence=['task_n_back'],  # Hier muss der Ordnername stehen
+        num_demo_participants=1,
+    ),
 ]
+
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
@@ -35,3 +42,5 @@ ADMIN_PASSWORD = environ.get('OTREE_ADMIN_PASSWORD')
 DEMO_PAGE_INTRO_HTML = """ """
 
 SECRET_KEY = '4730736264686'
+
+DEBUG = False
