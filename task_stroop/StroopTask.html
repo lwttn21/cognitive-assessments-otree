@@ -1,0 +1,146 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Stroop Task
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Clean layout */
+    .test-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 50vh;
+        user-select: none; /* Prevents text selection */
+    }
+
+    #stimulus-word {
+        font-size: 80px;
+        font-weight: 800;
+        margin-bottom: 60px;
+        min-height: 100px; /* Prevents jumping layout */
+        letter-spacing: 2px;
+    }
+
+    .btn-color {
+        width: 130px;
+        height: 65px;
+        font-size: 18px;
+        margin: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-width: 2px;
+        transition: transform 0.1s;
+    }
+
+    .btn-color:active {
+        transform: scale(0.95);
+    }
+</style>
+
+<div class="test-container">
+    <div id="stimulus-word">Ready?</div>
+
+    <div id="buttons-container" style="display:none;">
+        <button type="button" class="btn btn-outline-dark btn-color" onclick="handleResponse('red')">Red</button>
+        <button type="button" class="btn btn-outline-dark btn-color" onclick="handleResponse('green')">Green</button>
+        <button type="button" class="btn btn-outline-dark btn-color" onclick="handleResponse('blue')">Blue</button>
+        <button type="button" class="btn btn-outline-dark btn-color" onclick="handleResponse('orange')">Orange</button>
+    </div>
+</div>
+
+<input type="hidden" name="stroop_score" id="input_score">
+<input type="hidden" name="stroop_errors" id="input_errors">
+<input type="hidden" name="stroop_avg_rt" id="input_avg_rt">
+<input type="hidden" name="stroop_raw_data" id="input_raw">
+
+<script>
+    // 1. Get trials from Python
+    const trials = js_vars.trials;
+
+    // 2. State variables
+    let currentTrialIndex = 0;
+    let startTime = 0;
+    let correctCount = 0;
+    let errorCount = 0;
+    let reactionTimes = [];
+    let rawLog = []; // Stores "Index_Correct_RT"
+
+    const wordEl = document.getElementById('stimulus-word');
+    const btnContainer = document.getElementById('buttons-container');
+
+    // Start first trial after 1 second delay
+    setTimeout(startTrial, 1000);
+
+    function startTrial() {
+        // Check if finished
+        if (currentTrialIndex >= trials.length) {
+            submitResults();
+            return;
+        }
+
+        const trial = trials[currentTrialIndex];
+
+        // Update UI
+        wordEl.innerText = trial.word;
+        wordEl.style.color = trial.color; // Apply hex color directly
+
+        // Show buttons & start timer
+        btnContainer.style.display = 'block';
+        startTime = performance.now();
+    }
+
+    function handleResponse(selectedColor) {
+        const endTime = performance.now();
+        const rt = Math.round(endTime - startTime);
+        const trial = trials[currentTrialIndex];
+
+        // Check correctness
+        const isCorrect = (selectedColor === trial.correct);
+
+        if (isCorrect) {
+            correctCount++;
+        } else {
+            errorCount++;
+        }
+
+        // Log data
+        reactionTimes.push(rt);
+        rawLog.push(`${currentTrialIndex}_${isCorrect}_${rt}`);
+
+        // Move to next step (Inter-Stimulus Interval)
+        showFixationCross();
+    }
+
+    function showFixationCross() {
+        // Hide buttons and show '+'
+        btnContainer.style.display = 'none';
+        wordEl.innerText = "+";
+        wordEl.style.color = "black";
+
+        currentTrialIndex++;
+
+        // Wait 500ms before next word
+        setTimeout(startTrial, 500);
+    }
+
+    function submitResults() {
+        // Calculate Average RT
+        const sumRt = reactionTimes.reduce((a, b) => a + b, 0);
+        const avgRt = reactionTimes.length > 0 ? (sumRt / reactionTimes.length) : 0;
+
+        // Fill hidden inputs
+        document.getElementById('input_score').value = correctCount;
+        document.getElementById('input_errors').value = errorCount;
+        document.getElementById('input_avg_rt').value = avgRt.toFixed(2);
+        document.getElementById('input_raw').value = rawLog.join(';');
+
+        // Submit to oTree
+        document.querySelector('form').submit();
+    }
+</script>
+
+{% endblock %}

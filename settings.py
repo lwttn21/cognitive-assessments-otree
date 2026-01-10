@@ -3,6 +3,7 @@ from os import environ
 SESSION_CONFIGS = [
     dict(
         name='Task_Go_No_Go',
+        display_name="Go no Go Task",
         app_sequence=['task_go_no_go'],
         num_demo_participants=1,
     ),
@@ -11,6 +12,12 @@ SESSION_CONFIGS = [
         display_name="N-Back Task",
         app_sequence=['task_n_back'],  # Hier muss der Ordnername stehen
         num_demo_participants=1,
+    ),
+    dict(
+        name='stroop',
+        display_name="Stroop Task",
+        num_demo_participants=1,
+        app_sequence=['task_stroop'],
     ),
 ]
 
