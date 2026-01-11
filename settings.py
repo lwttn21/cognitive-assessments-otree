@@ -25,11 +25,17 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['survey_mfi'],
     ),
-dict(
+    dict(
         name='vas',
         display_name="VAS Survey",
         num_demo_participants=1,
         app_sequence=['survey_vas'],
+    ),
+    dict(
+        name='rvp',
+        display_name="Rapid Visual Information Processing (RVP)",
+        num_demo_participants=1,
+        app_sequence=['task_rvp'],
     ),
 ]
 

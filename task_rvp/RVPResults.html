@@ -1,0 +1,54 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Results: RVP Task
+{% endblock %}
+
+{% block content %}
+    <div class="card m-3">
+        <div class="card-body text-center">
+            <h3>Test Completed</h3>
+            <br>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="alert alert-success">
+                        <h4>Hits</h4>
+                        <h2 class="display-4">{{ player.rvp_hits }}</h2>
+                        <small>Correct Detections</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-warning">
+                        <h4>Misses</h4>
+                        <h2 class="display-4">{{ player.rvp_misses }}</h2>
+                         <small>Missed Sequences</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-danger">
+                        <h4>False Alarms</h4>
+                        <h2 class="display-4">{{ player.rvp_false_alarms }}</h2>
+                         <small>Incorrect Clicks</small>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-info">
+                        <h4>Avg. Speed</h4>
+                        <h2 class="display-4">{{ player.rvp_avg_rt|to0 }} ms</h2>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <p>Click below to continue.</p>
+        </div>
+    </div>
+
+    <div class="text-center">
+        {% next_button %}
+    </div>
+{% endblock %}

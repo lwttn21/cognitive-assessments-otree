@@ -1,0 +1,179 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    RVP Task
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .task-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 60vh;
+        user-select: none;
+    }
+
+    #digit-display {
+        width: 200px;
+        height: 200px;
+        border: 4px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 100px;
+        font-weight: bold;
+        background-color: white;
+        margin-bottom: 50px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    #response-btn {
+        width: 300px;
+        height: 80px;
+        font-size: 24px;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        background-color: #3b82f6; /* Modern Blue */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: background-color 0.1s;
+    }
+
+    #response-btn:active {
+        background-color: #2563eb;
+        transform: scale(0.98);
+    }
+
+    .reminder {
+        margin-top: 30px;
+        color: #555;
+        font-size: 1.2em;
+        font-weight: normal;
+    }
+
+    .target-highlight {
+        font-weight: bold;
+        font-size: 1.3em;
+        color: #111;
+        letter-spacing: 2px;
+    }
+</style>
+
+<div class="task-container">
+
+    <div id="digit-display">Ready</div>
+
+    <button type="button" id="response-btn" onmousedown="handleResponse()">
+        PRESS HERE
+    </button>
+
+    <div class="reminder">
+        Target: <span id="target-display" class="target-highlight">Loading...</span>
+    </div>
+</div>
+
+<input type="hidden" name="rvp_hits" id="input_hits">
+<input type="hidden" name="rvp_misses" id="input_misses">
+<input type="hidden" name="rvp_false_alarms" id="input_false_alarms">
+<input type="hidden" name="rvp_avg_rt" id="input_avg_rt">
+<input type="hidden" name="rvp_raw_data" id="input_raw">
+<input type="hidden" name="rvp_active_target" id="input_active_target">
+
+<script>
+    // Data from Python
+    const stream = js_vars.stream;
+    const targetIndices = js_vars.target_indices;
+    const speedMs = js_vars.speed;
+    const targetString = js_vars.target_string; // The single target (e.g. "2 - 4 - 6")
+
+    // Update UI immediately with the assigned target
+    document.getElementById('target-display').innerText = targetString;
+    document.getElementById('input_active_target').value = targetString;
+
+    // State
+    let currentIndex = -1;
+    let startTime = 0;
+    let testActive = false;
+
+    let hits = 0;
+    let falseAlarms = 0;
+    let responseTimes = [];
+    let rawLog = [];
+
+    let lastProcessedIndex = -999;
+
+    const displayEl = document.getElementById('digit-display');
+
+    setTimeout(startStream, 2000);
+
+    function startStream() {
+        testActive = true;
+        displayEl.innerText = "";
+        nextDigit();
+        setInterval(nextDigit, speedMs);
+    }
+
+    function nextDigit() {
+        currentIndex++;
+
+        if (currentIndex >= stream.length) {
+            endTest();
+            return;
+        }
+
+        const digit = stream[currentIndex];
+        displayEl.innerText = digit;
+        startTime = performance.now();
+    }
+
+    function handleResponse() {
+        if (!testActive) return;
+
+        const now = performance.now();
+        const rt = Math.round(now - startTime);
+
+        const isTarget = targetIndices.includes(currentIndex);
+
+        if (currentIndex === lastProcessedIndex) return;
+        lastProcessedIndex = currentIndex;
+
+        let isCorrect = false;
+
+        if (isTarget) {
+            hits++;
+            isCorrect = true;
+            responseTimes.push(rt);
+        } else {
+            falseAlarms++;
+            isCorrect = false;
+        }
+
+        rawLog.push(`${currentIndex}_${stream[currentIndex]}_${isCorrect}_${rt}`);
+    }
+
+    function endTest() {
+        testActive = false;
+        displayEl.innerText = "End";
+
+        const totalTargets = targetIndices.length;
+        const misses = totalTargets - hits;
+
+        const sumRt = responseTimes.reduce((a, b) => a + b, 0);
+        const avgRt = responseTimes.length > 0 ? (sumRt / responseTimes.length) : 0;
+
+        document.getElementById('input_hits').value = hits;
+        document.getElementById('input_misses').value = misses;
+        document.getElementById('input_false_alarms').value = falseAlarms;
+        document.getElementById('input_avg_rt').value = avgRt.toFixed(2);
+        document.getElementById('input_raw').value = rawLog.join(';');
+
+        document.querySelector('form').submit();
+    }
+</script>
+
+{% endblock %}
