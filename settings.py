@@ -49,6 +49,12 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['task_ssp'],
     ),
+    dict(
+        name='mot',
+        display_name="Motor Screening Task (MOT)",
+        num_demo_participants=1,
+        app_sequence=['task_mot'],
+    ),
 ]
 
 

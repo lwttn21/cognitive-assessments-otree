@@ -1,0 +1,185 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Motor Screening Task
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Task Container */
+    #mot-container {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        margin: 0 auto;
+        background-color: #222; /* Dark background typical for MOT */
+        border: 2px solid #555;
+        border-radius: 4px;
+        cursor: crosshair; /* Crosshair cursor for precision */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        overflow: hidden;
+    }
+
+    /* The Cross Styling */
+    .cross-target {
+        position: absolute;
+        width: 40px; /* Should match C.CROSS_SIZE_PX */
+        height: 40px;
+        /* Center the anchor point */
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+    }
+
+    /* Drawing the Cross shape using CSS gradients or borders */
+    .cross-target::before, .cross-target::after {
+        content: '';
+        position: absolute;
+        background-color: #00E676; /* Bright Green */
+        border-radius: 2px;
+    }
+
+    /* Horizontal line */
+    .cross-target::before {
+        top: 18px; left: 0;
+        width: 100%; height: 4px;
+    }
+
+    /* Vertical line */
+    .cross-target::after {
+        top: 0; left: 18px;
+        width: 4px; height: 100%;
+    }
+
+    /* Hover effect to help visibility */
+    .cross-target:hover::before, .cross-target:hover::after {
+        background-color: #69F0AE;
+    }
+
+    #status-msg {
+        text-align: center;
+        margin-top: 10px;
+        color: #666;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div id="mot-container">
+    </div>
+<div id="status-msg">Task in progress...</div>
+
+<input type="hidden" name="mot_mean_rt" id="input_rt">
+<input type="hidden" name="mot_mean_error" id="input_error">
+<input type="hidden" name="mot_raw_data" id="input_raw">
+
+<script>
+    // Config
+    const numTrials = js_vars.num_trials;
+    const containerW = js_vars.container_w;
+    const containerH = js_vars.container_h;
+    const crossSize = js_vars.cross_size; // 40px
+
+    // State
+    let currentTrial = 0;
+    let trialStartTime = 0;
+    let results = []; // {rt, error, x, y}
+
+    const container = document.getElementById('mot-container');
+
+    // Start immediately
+    setTimeout(nextTrial, 500);
+
+    function nextTrial() {
+        if (currentTrial >= numTrials) {
+            finishTask();
+            return;
+        }
+
+        // 1. Remove old cross if exists
+        container.innerHTML = '';
+
+        // 2. Generate random position
+        // We ensure padding so the cross doesn't get cut off at the edges
+        const padding = crossSize;
+        const maxW = containerW - padding;
+        const maxH = containerH - padding;
+
+        const randX = Math.floor(Math.random() * (maxW - padding) + padding);
+        const randY = Math.floor(Math.random() * (maxH - padding) + padding);
+
+        // 3. Create Cross Element
+        const cross = document.createElement('div');
+        cross.classList.add('cross-target');
+        cross.style.left = randX + 'px';
+        cross.style.top = randY + 'px';
+
+        // 4. Attach Click Event
+        // Note: Using 'mousedown' for better timing precision than 'click'
+        cross.onmousedown = (e) => handleCrossClick(e, randX, randY);
+
+        container.appendChild(cross);
+        trialStartTime = performance.now();
+    }
+
+    function handleCrossClick(e, targetX, targetY) {
+        // Prevent double clicks
+        e.target.onmousedown = null;
+
+        const endTime = performance.now();
+        const rt = Math.round(endTime - trialStartTime);
+
+        // Calculate Accuracy (Pixel Distance)
+        // We need the click position relative to the container
+        const rect = container.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        // Euclidean distance: sqrt((x2-x1)^2 + (y2-y1)^2)
+        const dist = Math.sqrt(Math.pow(clickX - targetX, 2) + Math.pow(clickY - targetY, 2));
+
+        // Log Data
+        results.push({
+            trial: currentTrial,
+            targetX: targetX,
+            targetY: targetY,
+            clickX: Math.round(clickX),
+            clickY: Math.round(clickY),
+            error: dist.toFixed(2),
+            rt: rt
+        });
+
+        currentTrial++;
+
+        // Short delay before next cross (standard MOT usually has immediate or very fast follow-up)
+        // Let's do 200ms clear screen
+        container.innerHTML = '';
+        setTimeout(nextTrial, 200);
+    }
+
+    function finishTask() {
+        container.innerHTML = '<div style="color:white; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%)">Done!</div>';
+
+        // Calculate Means
+        const totalRT = results.reduce((sum, r) => sum + r.rt, 0);
+        const totalError = results.reduce((sum, r) => sum + parseFloat(r.error), 0);
+
+        const meanRT = totalRT / numTrials;
+        const meanError = totalError / numTrials;
+
+        // Build Raw String
+        const rawString = results.map(r =>
+            `${r.trial}_${r.targetX}_${r.targetY}_${r.clickX}_${r.clickY}_${r.error}_${r.rt}`
+        ).join(';');
+
+        // Save to inputs
+        document.getElementById('input_rt').value = meanRT.toFixed(2);
+        document.getElementById('input_error').value = meanError.toFixed(2);
+        document.getElementById('input_raw').value = rawString;
+
+        // Submit
+        document.querySelector('form').submit();
+    }
+
+</script>
+
+{% endblock %}
