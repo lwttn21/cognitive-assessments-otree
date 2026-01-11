@@ -23,7 +23,7 @@ class C(BaseConstants):
     WORDS = ['RED', 'BLUE', 'GREEN', 'ORANGE']
 
     NUM_TRIALS = 20
-    TIMEOUT_SECONDS = 30#120  # 2 minutes total limit
+    TIMEOUT_SECONDS = 120  # 2 minutes total limit
 
 
 class Subsession(BaseSubsession):
