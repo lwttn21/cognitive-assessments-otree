@@ -19,6 +19,12 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['task_stroop'],
     ),
+    dict(
+        name='survey_mfi',
+        display_name="Mental Fatigue Inventory",
+        num_demo_participants=1,
+        app_sequence=['survey_mfi'],
+    ),
 ]
 
 
