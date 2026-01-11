@@ -37,6 +37,12 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['task_rvp'],
     ),
+    dict(
+        name='rti',
+        display_name="Reaction Time (RTI)",
+        num_demo_participants=1,
+        app_sequence=['task_rti'],
+    ),
 ]
 
 

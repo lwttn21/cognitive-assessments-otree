@@ -1,0 +1,263 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    RTI Task
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .task-area {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        height: 450px;
+        margin: 0 auto;
+        background-color: #f8f9fa;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        user-select: none; /* Prevent text selection while dragging */
+    }
+
+    /* Target Circles */
+    .target-circle {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 3px solid #333;
+        background-color: white;
+        cursor: pointer;
+        transition: background-color 0.1s;
+    }
+
+    /* Target Positions (Arc Layout) */
+    #target-1 { top: 100px; left: 20px; }
+    #target-2 { top: 40px; left: 140px; }
+    #target-3 { top: 20px; left: 270px; /* Center Top */ }
+    #target-4 { top: 40px; right: 140px; }
+    #target-5 { top: 100px; right: 20px; }
+
+    .active-stimulus {
+        background-color: #FFD700 !important; /* Yellow */
+        box-shadow: 0 0 15px #FFD700;
+        border-color: #DAA520;
+    }
+
+    /* Home Button */
+    .home-button {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        border: 4px solid #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #555;
+        cursor: grab;
+        z-index: 10;
+    }
+
+    .home-button:active, .home-button.holding {
+        background-color: #b0b0b0;
+        border-color: #666;
+        cursor: grabbing;
+    }
+
+    /* Feedback Text */
+    #feedback-msg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: #dc3545;
+        display: none;
+    }
+</style>
+
+<div class="task-area" id="game-board">
+
+    <div id="target-1" class="target-circle" onclick="handleTargetClick(1)"></div>
+    <div id="target-2" class="target-circle" onclick="handleTargetClick(2)"></div>
+    <div id="target-3" class="target-circle" onclick="handleTargetClick(3)"></div>
+    <div id="target-4" class="target-circle" onclick="handleTargetClick(4)"></div>
+    <div id="target-5" class="target-circle" onclick="handleTargetClick(5)"></div>
+
+    <div id="feedback-msg">Too Early!</div>
+
+    <div id="home-btn" class="home-button">
+        HOME
+    </div>
+
+</div>
+
+<div class="text-center mt-4">
+    <p class="text-muted">Trial: <span id="trial-counter">1</span> / <span id="total-trials">--</span></p>
+</div>
+
+<input type="hidden" name="rti_mean_rt" id="input_rt">
+<input type="hidden" name="rti_mean_mt" id="input_mt">
+<input type="hidden" name="rti_total_score" id="input_score">
+<input type="hidden" name="rti_errors" id="input_errors">
+<input type="hidden" name="rti_raw_data" id="input_raw">
+
+<script>
+    // Variables from Python
+    const trials = js_vars.trials;
+    document.getElementById('total-trials').innerText = trials.length;
+
+    // State Variables
+    let currentTrialIndex = 0;
+    let state = "IDLE"; // IDLE, HOLDING, STIMULUS, DONE
+    let timerId = null;
+
+    // Timing timestamps
+    let t_hold_start = 0;
+    let t_stimulus_onset = 0;
+    let t_release = 0;
+
+    // Results
+    let rawLog = [];
+    let rt_sum = 0;
+    let mt_sum = 0;
+    let correct_count = 0;
+    let error_count = 0;
+
+    const homeBtn = document.getElementById('home-btn');
+    const feedbackEl = document.getElementById('feedback-msg');
+
+    // --- EVENT LISTENERS FOR HOME BUTTON ---
+
+    homeBtn.addEventListener('mousedown', function(e) {
+        if (state !== "IDLE") return;
+
+        // Start Holding
+        state = "HOLDING";
+        homeBtn.classList.add("holding");
+        homeBtn.innerText = "HOLD...";
+        feedbackEl.style.display = "none";
+
+        // Schedule Stimulus
+        const currentDelay = trials[currentTrialIndex].delay;
+        timerId = setTimeout(showStimulus, currentDelay);
+    });
+
+    // Listen for mouseup ANYWHERE on document to catch premature releases
+    document.addEventListener('mouseup', function(e) {
+        if (state === "HOLDING") {
+            // RELEASED TOO EARLY!
+            clearTimeout(timerId);
+            handleEarlyRelease();
+        } else if (state === "STIMULUS") {
+            // VALID RELEASE (Reaction Time)
+            t_release = performance.now();
+            state = "MOVING"; // User is now moving towards target
+            homeBtn.classList.remove("holding");
+            homeBtn.innerText = "GO!";
+        }
+    });
+
+    // --- LOGIC ---
+
+    function showStimulus() {
+        if (state !== "HOLDING") return;
+
+        state = "STIMULUS";
+        t_stimulus_onset = performance.now();
+
+        // Highlight correct target
+        const targetIdx = trials[currentTrialIndex].target_index;
+        document.getElementById(`target-${targetIdx}`).classList.add('active-stimulus');
+    }
+
+    function handleTargetClick(clickedIndex) {
+        if (state !== "MOVING") return;
+
+        const correctIndex = trials[currentTrialIndex].target_index;
+
+        if (clickedIndex === correctIndex) {
+            // Success!
+            const t_click = performance.now();
+            const rt = t_release - t_stimulus_onset; // Reaction Time
+            const mt = t_click - t_release;          // Movement Time
+
+            saveTrialData(true, rt, mt, "OK");
+            correct_count++;
+            rt_sum += rt;
+            mt_sum += mt;
+
+        } else {
+            // Wrong target clicked
+            saveTrialData(false, 0, 0, "WRONG_TARGET");
+            error_count++;
+        }
+
+        cleanupAndNext();
+    }
+
+    function handleEarlyRelease() {
+        // User let go before stimulus
+        state = "IDLE"; // Reset immediately but count error
+        homeBtn.classList.remove("holding");
+        homeBtn.innerText = "HOME";
+
+        feedbackEl.innerText = "Too Early!";
+        feedbackEl.style.display = "block";
+
+        error_count++;
+        saveTrialData(false, 0, 0, "EARLY_RELEASE");
+
+        // Penalty delay or just reset? Usually just reset in RTI instructions.
+        // We stay on same trial index or move on?
+        // Strict RTI moves on, but often we retry. Let's move on to keep duration predictable.
+        cleanupAndNext();
+    }
+
+    function saveTrialData(success, rt, mt, status) {
+        const target = trials[currentTrialIndex].target_index;
+        // Log: Trial_Target_RT_MT_Status
+        rawLog.push(`${currentTrialIndex}_${target}_${Math.round(rt)}_${Math.round(mt)}_${status}`);
+    }
+
+    function cleanupAndNext() {
+        // Remove highlight
+        const targetIdx = trials[currentTrialIndex].target_index;
+        document.getElementById(`target-${targetIdx}`).classList.remove('active-stimulus');
+
+        homeBtn.classList.remove("holding");
+        homeBtn.innerText = "HOME";
+        state = "IDLE";
+
+        currentTrialIndex++;
+        document.getElementById('trial-counter').innerText = currentTrialIndex + 1;
+
+        if (currentTrialIndex >= trials.length) {
+            endTest();
+        }
+    }
+
+    function endTest() {
+        // Calculate Means
+        const avgRT = correct_count > 0 ? (rt_sum / correct_count) : 0;
+        const avgMT = correct_count > 0 ? (mt_sum / correct_count) : 0;
+
+        document.getElementById('input_rt').value = avgRT.toFixed(2);
+        document.getElementById('input_mt').value = avgMT.toFixed(2);
+        document.getElementById('input_score').value = correct_count;
+        document.getElementById('input_errors').value = error_count;
+        document.getElementById('input_raw').value = rawLog.join(';');
+
+        document.querySelector('form').submit();
+    }
+
+</script>
+
+{% endblock %}
