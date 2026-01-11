@@ -43,6 +43,12 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['task_rti'],
     ),
+    dict(
+        name='ssp',
+        display_name="Spatial Span (SSP)",
+        num_demo_participants=1,
+        app_sequence=['task_ssp'],
+    ),
 ]
 
 

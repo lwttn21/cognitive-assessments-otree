@@ -1,0 +1,27 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Results: SSP Task
+{% endblock %}
+
+{% block content %}
+    <div class="card m-3">
+        <div class="card-body text-center">
+            <h3>Test Completed</h3>
+            <br>
+
+            <div class="alert alert-primary">
+                <h4>Your Spatial Span</h4>
+                <h1 class="display-1" style="font-weight: bold;">{{ final_score }}</h1>
+                <p>Maximum sequence length recalled correctly.</p>
+            </div>
+
+            <hr>
+            <p>Click below to continue.</p>
+        </div>
+    </div>
+
+    <div class="text-center">
+        {% next_button %}
+    </div>
+{% endblock %}

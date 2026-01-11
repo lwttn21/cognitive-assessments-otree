@@ -1,0 +1,201 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Spatial Span
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* --- CSS Layout --- */
+
+    #ssp-container {
+        position: relative;
+        width: 600px;
+        height: 500px;
+        margin: 0 auto;
+        background-color: #333; /* Dark background enhances contrast */
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    /* Individual Box Styling */
+    .ssp-box {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        background-color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.1s;
+        /* Centers the box on its coordinate */
+        transform: translate(-50%, -50%);
+    }
+
+    .ssp-box:active {
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    /* Active State (Flashing) */
+    .flash-stimulus {
+        background-color: #00E676 !important; /* Bright Green */
+        box-shadow: 0 0 15px #00E676;
+    }
+
+    /* Invisible layer to block input during playback */
+    #block-layer {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        z-index: 100;
+        display: none;
+    }
+
+    #status-text {
+        text-align: center;
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #555;
+        min-height: 24px;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div id="status-text">Watch the sequence...</div>
+
+<div id="ssp-container">
+    <div id="block-layer"></div>
+    </div>
+
+<input type="hidden" name="ssp_is_correct" id="input_correct">
+<input type="hidden" name="ssp_sequence" id="input_sequence">
+<input type="hidden" name="ssp_response" id="input_response">
+<input type="hidden" name="ssp_current_span_length" id="input_span">
+<input type="hidden" name="ssp_rt_seq" id="input_rt_seq">
+
+<script>
+    // --- Configuration ---
+    const positions = js_vars.box_positions;
+    const sequence = js_vars.sequence;
+    const flashDur = js_vars.flash_duration;
+    const pauseDur = js_vars.pause_duration;
+
+    // --- DOM Elements ---
+    const container = document.getElementById('ssp-container');
+    const blockLayer = document.getElementById('block-layer');
+    const statusText = document.getElementById('status-text');
+
+    // --- State Variables ---
+    let userResponse = [];
+    let clickTimestamps = [];
+    let sequenceStartTime = 0;
+    let inputEnabled = false;
+
+    // 1. Initialize Boxes on the Grid
+    positions.forEach((pos, index) => {
+        let box = document.createElement('div');
+        box.classList.add('ssp-box');
+        box.id = 'box-' + index;
+        // Position is defined in percentages (Top, Left)
+        box.style.top = pos[0] + '%';
+        box.style.left = pos[1] + '%';
+
+        box.onclick = () => handleBoxClick(index);
+
+        container.appendChild(box);
+    });
+
+    // 2. Start the Sequence Playback (with delay)
+    setTimeout(playSequence, 1000);
+
+    function playSequence() {
+        blockLayer.style.display = 'block'; // Block user input
+        inputEnabled = false;
+        statusText.innerText = "Watch the sequence...";
+
+        let i = 0;
+
+        function flashNext() {
+            if (i >= sequence.length) {
+                finishPlayback();
+                return;
+            }
+
+            let boxIndex = sequence[i];
+            let box = document.getElementById('box-' + boxIndex);
+
+            // Visual Flash ON
+            box.classList.add('flash-stimulus');
+
+            // Visual Flash OFF
+            setTimeout(() => {
+                box.classList.remove('flash-stimulus');
+                i++;
+                setTimeout(flashNext, pauseDur);
+            }, flashDur);
+        }
+
+        flashNext();
+    }
+
+    function finishPlayback() {
+        blockLayer.style.display = 'none'; // Enable user input
+        inputEnabled = true;
+        statusText.innerText = "Your turn!";
+        sequenceStartTime = performance.now();
+    }
+
+    function handleBoxClick(index) {
+        if (!inputEnabled) return;
+
+        let rt = Math.round(performance.now() - sequenceStartTime);
+
+        // Immediate visual feedback for the user's click
+        let box = document.getElementById('box-' + index);
+        box.classList.add('flash-stimulus');
+        setTimeout(() => box.classList.remove('flash-stimulus'), 150);
+
+        userResponse.push(index);
+        clickTimestamps.push(rt);
+
+        // Step-by-Step Validation
+        // Check if the clicked box matches the sequence at the current position
+        let currentStep = userResponse.length - 1;
+        if (userResponse[currentStep] !== sequence[currentStep]) {
+            handleEnd(false); // Immediate failure
+            return;
+        }
+
+        // Check for Completion
+        if (userResponse.length === sequence.length) {
+            handleEnd(true); // Success
+        }
+    }
+
+    function handleEnd(success) {
+        inputEnabled = false;
+        blockLayer.style.display = 'block'; // Block further input
+
+        // Set Data to Hidden Inputs
+        // Note: We use 1 (True) and 0 (False) as Integers
+        document.getElementById('input_correct').value = success ? 1 : 0;
+
+        document.getElementById('input_sequence').value = sequence.join('-');
+        document.getElementById('input_response').value = userResponse.join('-');
+        document.getElementById('input_rt_seq').value = clickTimestamps.join(';');
+
+        // Visual Feedback and Submission
+        if (success) {
+            statusText.innerText = "Correct!";
+            statusText.style.color = "#00E676"; // Green
+            setTimeout(() => document.querySelector('form').submit(), 800);
+        } else {
+            statusText.innerText = "Incorrect.";
+            statusText.style.color = "#FF5252"; // Red
+            container.style.borderColor = "#FF5252";
+            setTimeout(() => document.querySelector('form').submit(), 1200);
+        }
+    }
+
+</script>
+
+{% endblock %}
