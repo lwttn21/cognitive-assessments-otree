@@ -25,6 +25,12 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
         app_sequence=['survey_mfi'],
     ),
+dict(
+        name='vas',
+        display_name="VAS Survey",
+        num_demo_participants=1,
+        app_sequence=['survey_vas'],
+    ),
 ]
 
 
