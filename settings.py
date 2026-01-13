@@ -10,7 +10,7 @@ SESSION_CONFIGS = [
     dict(
         name='n_back_test',
         display_name="N-Back Task",
-        app_sequence=['task_n_back'],  # Hier muss der Ordnername stehen
+        app_sequence=['task_n_back'],
         num_demo_participants=1,
     ),
     dict(
@@ -54,6 +54,18 @@ SESSION_CONFIGS = [
         display_name="Motor Screening Task (MOT)",
         num_demo_participants=1,
         app_sequence=['task_mot'],
+    ),
+dict(
+        name='tmt_a',
+        display_name="Trail Making Task A (TMT-A)",
+        num_demo_participants=1,
+        app_sequence=['task_tmt_a'],
+    ),
+dict(
+        name='tmt_b',
+        display_name="Trail Making Task B (TMT-B)",
+        num_demo_participants=1,
+        app_sequence=['task_tmt_b'],
     ),
 ]
 

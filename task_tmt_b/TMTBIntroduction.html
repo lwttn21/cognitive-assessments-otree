@@ -1,0 +1,70 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}Trail Making Test - Part B{% endblock %}
+
+{% block content %}
+<style>
+    .example-box {
+        border: 2px solid #dee2e6; border-radius: 8px; background: #f8f9fa;
+        padding: 20px; position: relative; height: 180px; margin-top: 15px;
+    }
+    .ex-circle {
+        position: absolute; width: 40px; height: 40px; border-radius: 50%;
+        border: 2px solid #0056b3; text-align: center; line-height: 36px; font-weight: bold;
+    }
+    .c-blue { background: #007bff; color: white; }
+    .c-green { background: #28a745; color: white; border-color: #1e7e34; }
+    .ex-line { position: absolute; background: #28a745; height: 3px; transform-origin: left center; }
+    .step-highlight { color: #0056b3; font-weight: bold; }
+</style>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <p>In this part of the test, your task is to connect the circles by <strong>switching back and forth</strong> between numbers and letters.</p>
+
+        <p><strong>The Rule:</strong> Always follow the order of the alphabet and the order of the numbers, one after the other:</p>
+
+        <div class="text-center my-3">
+            <h4 style="letter-spacing: 2px;">
+                <span class="badge bg-primary">1</span> &rarr;
+                <span class="badge bg-dark">A</span> &rarr;
+                <span class="badge bg-primary">2</span> &rarr;
+                <span class="badge bg-dark">B</span> &rarr;
+                <span class="badge bg-primary">3</span> &rarr;
+                <span class="badge bg-dark">C</span> ...
+            </h4>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>How to play:</strong>
+            <ol>
+                <li>Start with the number <span class="step-highlight">1</span>.</li>
+                <li>Then find the first letter: <span class="step-highlight">A</span>.</li>
+                <li>Then the next number: <span class="step-highlight">2</span>.</li>
+                <li>Then the next letter: <span class="step-highlight">B</span>, and so on.</li>
+            </ol>
+        </div>
+
+        <div class="example-box">
+            <p class="small text-muted" style="position: absolute; top: 5px; left: 10px;">Visual Example:</p>
+            <div class="ex-line" style="top: 80px; left: 60px; width: 100px; transform: rotate(35deg);"></div>
+
+            <div class="ex-circle c-green" style="top: 60px; left: 20px;">1</div>
+            <div class="ex-circle c-green" style="top: 120px; left: 150px;">A</div>
+            <div class="ex-circle c-blue" style="top: 70px; left: 300px;">2</div>
+
+            <div style="position: absolute; bottom: 10px; right: 20px; font-size: 0.85rem;" class="text-muted">
+                Next target: <strong>2</strong>
+            </div>
+        </div>
+
+        <p class="mt-3">
+            If you click the wrong circle, it will flash <strong class="text-danger">red</strong>.
+            Try to be as <strong>fast</strong> as possible without making mistakes.
+        </p>
+    </div>
+</div>
+
+<button class="otree-next-button btn btn-primary">Start Task</button>
+{% endblock %}

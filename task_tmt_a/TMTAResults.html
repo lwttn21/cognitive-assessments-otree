@@ -1,0 +1,44 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    Task Completed
+{% endblock %}
+
+{% block content %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="text-success">Thank you for participating!</h4>
+            <p>You have successfully completed the Trail Making Test - Part A.</p>
+
+            <table class="table table-bordered mt-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Your Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total time</td>
+                        <td><strong>{{ player.tmt_a_duration }} seconds</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Average time per circle</td>
+                        <td><strong>{{ player.tmt_a_avg_speed }} seconds</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Errors made</td>
+                        <td><strong class="text-danger">{{ player.tmt_a_errors }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p class="text-muted">
+                Your performance data has been recorded for our mental fatigue study.
+            </p>
+        </div>
+    </div>
+
+    <button class="otree-next-button btn btn-primary">Continue</button>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+    TMT - Part A
+{% endblock %}
+
+{% block content %}
+<style>
+    #tmt-wrapper {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        margin: auto;
+    }
+    #tmt-container {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: transparent;
+        z-index: 2; /* Kreise liegen oben */
+    }
+    #tmt-canvas {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: #ffffff;
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        z-index: 1; /* Linien liegen darunter */
+    }
+    .tmt-circle {
+        position: absolute;
+        width: 45px; height: 45px;
+        border: 2px solid #0056b3;
+        background-color: #007bff;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 41px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        transform: translate(-50%, -50%); /* Zentrierung auf Koordinate */
+    }
+    .tmt-circle.correct { background-color: #28a745 !important; border-color: #1e7e34; cursor: default; }
+    .tmt-circle.wrong { background-color: #dc3545 !important; border-color: #bd2130; }
+</style>
+
+<div class="d-flex justify-content-between mb-3">
+    <span>Next number: <strong id="next-target">1</strong></span>
+    <span>Errors: <strong id="error-count" class="text-danger">0</strong></span>
+</div>
+
+<div id="tmt-wrapper">
+    <canvas id="tmt-canvas" width="800" height="600"></canvas>
+    <div id="tmt-container"></div>
+</div>
+
+<input type="hidden" name="tmt_a_errors" id="tmt_a_errors" value="0">
+<input type="hidden" name="tmt_a_duration" id="tmt_a_duration">
+<input type="hidden" name="tmt_a_avg_speed" id="tmt_a_avg_speed">
+
+<script>
+    const container = document.getElementById('tmt-container');
+    const canvas = document.getElementById('tmt-canvas');
+    const ctx = canvas.getContext('2d');
+    const numCircles = {{ C.NUM_CIRCLES }};
+
+    let currentIndex = 1;
+    let errors = 0;
+    let startTime = Date.now();
+    let placedCircles = [];
+    let lastPoint = null;
+
+    // Canvas Größe an Container anpassen
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+
+    function isOverlapping(x, y) {
+        for (let c of placedCircles) {
+            let dist = Math.sqrt(Math.pow(x - c.x, 2) + Math.pow(y - c.y, 2));
+            if (dist < 65) return true;
+        }
+        return false;
+    }
+
+    function drawLine(p1, p2) {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = "#28a745"; // Grüne Linie
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
+
+    for (let i = 1; i <= numCircles; i++) {
+        let x, y;
+        do {
+            x = Math.random() * (container.clientWidth - 80) + 40;
+            y = Math.random() * (container.clientHeight - 80) + 40;
+        } while (isOverlapping(x, y));
+
+        const circle = document.createElement('div');
+        circle.className = 'tmt-circle';
+        circle.style.left = x + 'px';
+        circle.style.top = y + 'px';
+        circle.innerText = i;
+
+        const currentPoint = {x, y};
+        placedCircles.push(currentPoint);
+
+        circle.onclick = function() {
+            if (i === currentIndex) {
+                circle.classList.add('correct');
+                circle.onclick = null;
+
+                // Linie zeichnen, falls es nicht der erste Kreis ist
+                if (lastPoint) {
+                    drawLine(lastPoint, currentPoint);
+                }
+                lastPoint = currentPoint;
+
+                currentIndex++;
+                if (currentIndex <= numCircles) {
+                    document.getElementById('next-target').innerText = currentIndex;
+                } else {
+                    finish();
+                }
+            } else if (!circle.classList.contains('correct')) {
+                errors++;
+                document.getElementById('error-count').innerText = errors;
+                document.getElementById('tmt_a_errors').value = errors;
+                circle.classList.add('wrong');
+                setTimeout(() => circle.classList.remove('wrong'), 400);
+            }
+        };
+        container.appendChild(circle);
+    }
+
+    function finish() {
+        const duration = (Date.now() - startTime) / 1000;
+        document.getElementById('tmt_a_duration').value = duration;
+        document.getElementById('tmt_a_avg_speed').value = duration / numCircles;
+        document.forms[0].submit();
+    }
+</script>
+{% endblock %}

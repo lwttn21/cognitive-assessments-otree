@@ -1,0 +1,115 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}TMT - Part B{% endblock %}
+
+{% block content %}
+<style>
+    #tmt-wrapper { position: relative; width: 100%; height: 600px; margin: auto; }
+    #tmt-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
+    #tmt-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; border: 2px solid #dee2e6; border-radius: 8px; z-index: 1; }
+    .tmt-circle {
+        position: absolute; width: 45px; height: 45px; border: 2px solid #0056b3; background-color: #007bff;
+        color: white; border-radius: 50%; text-align: center; line-height: 41px; font-weight: bold;
+        cursor: pointer; transition: background-color 0.2s; transform: translate(-50%, -50%);
+    }
+    .tmt-circle.correct { background-color: #28a745 !important; border-color: #1e7e34; cursor: default; }
+    .tmt-circle.wrong { background-color: #dc3545 !important; border-color: #bd2130; }
+</style>
+
+<div class="d-flex justify-content-between mb-3">
+    <span>Next target: <strong id="next-target"></strong></span>
+    <span>Errors: <strong id="error-count" class="text-danger">0</strong></span>
+</div>
+
+<div id="tmt-wrapper">
+    <canvas id="tmt-canvas"></canvas>
+    <div id="tmt-container"></div>
+</div>
+
+<input type="hidden" name="tmt_b_errors" id="tmt_b_errors" value="0">
+<input type="hidden" name="tmt_b_duration" id="tmt_b_duration">
+<input type="hidden" name="tmt_b_avg_speed" id="tmt_b_avg_speed">
+
+<script>
+    const container = document.getElementById('tmt-container');
+    const canvas = document.getElementById('tmt-canvas');
+    const ctx = canvas.getContext('2d');
+    const numCircles = {{ C.NUM_CIRCLES }};
+
+    let currentIndex = 0;
+    let errors = 0;
+    let startTime = Date.now();
+    let placedCircles = [];
+    let lastPoint = null;
+
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+
+    // 1. Sequenz generieren: 1, A, 2, B, 3, C...
+    const sequence = [];
+    let n = 1, c = 65;
+    for(let i=0; i<numCircles; i++) {
+        if(i%2===0) { sequence.push(String(n++)); }
+        else { sequence.push(String.fromCharCode(c++)); }
+    }
+    document.getElementById('next-target').innerText = sequence[0];
+
+    function isOverlapping(x, y) {
+        for (let circ of placedCircles) {
+            if (Math.sqrt(Math.pow(x-circ.x, 2) + Math.pow(y-circ.y, 2)) < 65) return true;
+        }
+        return false;
+    }
+
+    function drawLine(p1, p2) {
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = "#28a745"; ctx.lineWidth = 3; ctx.stroke();
+    }
+
+    sequence.forEach((label, idx) => {
+        let x, y;
+        do {
+            x = Math.random() * (container.clientWidth - 80) + 40;
+            y = Math.random() * (container.clientHeight - 80) + 40;
+        } while (isOverlapping(x, y));
+
+        const circle = document.createElement('div');
+        circle.className = 'tmt-circle';
+        circle.style.left = x + 'px'; circle.style.top = y + 'px';
+        circle.innerText = label;
+
+        const currentPoint = {x, y};
+        placedCircles.push(currentPoint);
+
+        circle.onclick = function() {
+            if (idx === currentIndex) {
+                circle.classList.add('correct');
+                circle.onclick = null;
+                if (lastPoint) drawLine(lastPoint, currentPoint);
+                lastPoint = currentPoint;
+                currentIndex++;
+                if (currentIndex < numCircles) {
+                    document.getElementById('next-target').innerText = sequence[currentIndex];
+                } else {
+                    finish();
+                }
+            } else if (!circle.classList.contains('correct')) {
+                errors++;
+                document.getElementById('error-count').innerText = errors;
+                document.getElementById('tmt_b_errors').value = errors;
+                circle.classList.add('wrong');
+                setTimeout(() => circle.classList.remove('wrong'), 400);
+            }
+        };
+        container.appendChild(circle);
+    });
+
+    function finish() {
+        const duration = (Date.now() - startTime) / 1000;
+        document.getElementById('tmt_b_duration').value = duration;
+        document.getElementById('tmt_b_avg_speed').value = duration / numCircles;
+        document.forms[0].submit();
+    }
+</script>
+{% endblock %}
