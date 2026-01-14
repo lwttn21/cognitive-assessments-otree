@@ -2,10 +2,21 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
+<<<<<<< HEAD
         name='my_session',
         app_sequence=['TestDustinTP'],
+=======
+        name='Task_Go_No_Go',
+        app_sequence=['task_go_no_go'],
         num_demo_participants=1,
     ),
+    dict(
+        name='Multitasking Test',
+        app_sequence=['multitaskingtest'],
+>>>>>>> b32768a (multitaskingtest)
+        num_demo_participants=1,
+    ),
+
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
