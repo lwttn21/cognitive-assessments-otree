@@ -21,12 +21,13 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    pass
+    trial_data = models.LongStringField ()
 
 
 # PAGES
 class MyPage(Page):
-    pass
+    form_model = "player"
+    form_fields = ["trial_data"]
 
 
 class ResultsWaitPage(WaitPage):
