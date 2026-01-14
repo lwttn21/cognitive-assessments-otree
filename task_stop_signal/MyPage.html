@@ -1,0 +1,123 @@
+{% extends "global/Page.html" %}
+{% load otree static %}
+
+{% block content %}
+
+<!--
+<div id="arrow" style="font-size: 80px; text-align: center; margin-top: 150px; visibility: hidden;">
+    {% if arrow == 'left' %}
+        ←
+    {% else %}
+        →
+    {% endif %}
+</div>
+-->
+<style>
+.otree-timer {
+    display: none !important;
+}
+</style>
+
+<div style="width: 300px; height: 300px; margin: 120px auto; border: 6px solid black; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;">
+
+    <div id="arrow" style="font-size: 160px; visibility: hidden;">
+        {% if arrow == 'left' %}
+            ←
+        {% else %}
+            →
+        {% endif %}
+    </div>
+
+
+
+<audio id="beep" preload="auto">
+    <source src="{% static 'task_stop_signal/beep.wav' %}" type="audio/wav">
+</audio>
+
+
+<script>
+let responded = false;
+let startTime = null;
+const stopSignalDelay = 250; // Typischerweise ca. 250ms nach dem Pfeil
+
+let isStopTrial = {{ stop_signal|json }};
+
+// 1. Pfeil sofort oder nach kurzem Offset anzeigen
+window.onload = function() {
+    const arrowDiv = document.getElementById('arrow');
+
+    // Pfeil anzeigen
+    arrowDiv.style.visibility = 'visible';
+    startTime = performance.now();
+
+    // 2. Stop Signal erst NACH dem Pfeil (SSD)
+    if (isStopTrial) {
+        setTimeout(function() {
+            // Nur abspielen, wenn der User noch nicht reagiert hat
+            if (!responded) {
+                document.getElementById('beep').play();
+            }
+        }, stopSignalDelay);
+    }
+};
+
+document.addEventListener('keydown', function(event) {
+    if (responded) return;
+    let key = event.key.toLowerCase();
+    if (key !== 'f' && key !== 'j') return;
+    if (startTime === null) return;
+
+    responded = true;
+    let rt = performance.now() - startTime;
+
+    liveSend({
+        key: key,
+        rt: rt
+    });
+
+    // Optisches Feedback: Pfeil ausblenden nach Tastendruck
+    document.getElementById('arrow').style.visibility = 'hidden';
+});
+</script>
+
+
+    <!--
+<script>
+let responded = false;
+let startTime = null;
+let stopSignalDelay = 100;   // ms
+
+let isStopTrial = false;
+{% if stop_signal %}
+    isStopTrial = true;
+{% endif %}
+
+
+if (isStopTrial) {
+    document.getElementById('beep').play();
+}
+
+setTimeout(function() {
+    document.getElementById('arrow').style.visibility = 'visible';
+    startTime = performance.now();
+}, isStopTrial ? stopSignalDelay : 0);
+
+
+document.addEventListener('keydown', function(event) {
+    if (responded) return;
+    if (event.key !== 'f' && event.key !== 'j') return;
+    if (startTime === null) return;
+
+    responded = true;
+    let rt = performance.now() - startTime;
+
+    liveSend({
+        key: event.key,
+        rt: rt
+    });
+});
+</script> -->
+
+
+{% endblock %}
