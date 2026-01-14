@@ -13,4 +13,4 @@ __temp*
 __pycache__/
 *.py[cod]
 .DS_Store
-*.otreezip
+*.otreezip_static/global/patterns/

@@ -1,0 +1,130 @@
+{{ block title }}Erkennungsphase (sofort){{ endblock }}
+{{ block content }}
+{% load otree static %}
+
+<style>
+  .wrap{max-width:1100px;margin:0 auto;text-align:center;}
+  .row{display:flex;justify-content:center;gap:80px;margin-top:40px;flex-wrap:wrap;}
+  .card{cursor:pointer;border:2px solid transparent;padding:6px;border-radius:10px;}
+  .card:hover{border-color:#999;}
+  img{max-width:360px;max-height:360px;}
+  .status{margin-top:14px;opacity:.75}
+</style>
+
+<div class="wrap">
+  <p>Wähle das Muster, das du schon gesehen hast.</p>
+  <div class="status" id="status">Start…</div>
+
+  <div class="row">
+    <div class="card" id="left"><img id="imgL" alt="Option links"></div>
+    <div class="card" id="right"><img id="imgR" alt="Option rechts"></div>
+  </div>
+</div>
+
+<input type="hidden" name="immrec_json" id="immrec_json">
+<input type="hidden" name="imm_score" id="imm_score">
+<input type="hidden" name="imm_mean_rt_ms" id="imm_mean_rt_ms">
+
+<script>
+(() => {
+ const targets = {{ targets|safe }};
+ const foils   = {{ foils|safe }};
+
+  const statusEl = document.getElementById('status');
+  const imgL = document.getElementById('imgL');
+  const imgR = document.getElementById('imgR');
+
+  function finishEmpty(){
+    document.getElementById('immrec_json').value = JSON.stringify([]);
+    document.getElementById('imm_score').value = 0;
+    document.getElementById('imm_mean_rt_ms').value = '';
+    document.getElementById('form').submit();
+  }
+
+  if (!targets.length || !foils.length || targets.length !== foils.length){
+    statusEl.textContent = "Stimuli fehlen – weiter…";
+    setTimeout(finishEmpty, 300);
+    return;
+  }
+
+  const trials = targets.map((t, i) => ({
+    trialInRound: i + 1,
+    target: t,
+    foil: foils[i],
+  }));
+
+  let idx = 0;
+  let startT = 0;
+  let log = [];
+  let correct = 0;
+  let rts = [];
+
+  function setTrial(){
+    const tr = trials[idx];
+    statusEl.textContent = `Runde {{ player.round_number }} – Trial ${idx+1} / ${trials.length}`;
+
+    const targetLeft = Math.random() < 0.5;
+    const leftFile  = targetLeft ? tr.target : tr.foil;
+    const rightFile = targetLeft ? tr.foil : tr.target;
+
+    imgL.src = "/static/" + leftFile;
+    imgR.src = "/static/" + rightFile;
+
+    startT = performance.now();
+    tr._targetLeft = targetLeft;
+    tr._leftFile = leftFile;
+    tr._rightFile = rightFile;
+  }
+
+  function finish(){
+    const mean = rts.length ? (rts.reduce((a,b)=>a+b,0) / rts.length) : null;
+    document.getElementById('immrec_json').value = JSON.stringify(log);
+    document.getElementById('imm_score').value = correct;
+    document.getElementById('imm_mean_rt_ms').value = mean === null ? '' : mean.toFixed(2);
+    document.getElementById('form').submit();
+  }
+
+  function choose(side){
+    const tr = trials[idx];
+    const rt = Math.round(performance.now() - startT);
+
+    const choseTarget =
+      (side === 'L' && tr._targetLeft) ||
+      (side === 'R' && !tr._targetLeft);
+
+    if (choseTarget){
+      correct++;
+      rts.push(rt);
+    }
+
+    log.push({
+      phase: "imm_rec",
+      round: {{ player.round_number }},
+      trial: idx + 1,
+      target: tr.target,
+      foil: tr.foil,
+      left: tr._leftFile,
+      right: tr._rightFile,
+      choice: side,
+      chose_target: choseTarget,
+      correct: choseTarget,
+      rt_ms: rt,
+      ts_ms: Date.now()
+    });
+
+    idx++;
+    if (idx >= trials.length){
+      finish();
+      return;
+    }
+    setTrial();
+  }
+
+  document.getElementById('left').addEventListener('click', ()=>choose('L'));
+  document.getElementById('right').addEventListener('click', ()=>choose('R'));
+
+  setTimeout(setTrial, 200);
+})();
+</script>
+
+{{ endblock }}

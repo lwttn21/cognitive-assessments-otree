@@ -1,0 +1,79 @@
+{{ block title }}Lernphase{{ endblock }}
+{{ block content }}
+{% load otree static %}
+
+<style>
+  .wrap{max-width:900px;margin:0 auto;text-align:center;}
+  .stim{margin-top:40px;}
+  img{max-width:420px;max-height:420px;}
+  .status{margin-top:18px;opacity:.75}
+</style>
+
+<div class="wrap">
+  <div class="status" id="status">Start…</div>
+  <div class="stim">
+    <img id="img" style="visibility:hidden;" alt="Stimulus"/>
+  </div>
+</div>
+
+<input type="hidden" name="study_json" id="study_json">
+
+<script>
+(() => {
+  const targets = {{ targets|safe }};
+  const stimMs = {{ stim_ms }};
+  const isiMin = {{ isi_min_ms }};
+  const isiMax = {{ isi_max_ms }};
+
+  const imgEl = document.getElementById('img');
+  const statusEl = document.getElementById('status');
+
+  let log = [];
+  let idx = 0;
+
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  function finish(){
+    document.getElementById('study_json').value = JSON.stringify(log);
+    document.getElementById('form').submit();
+  }
+
+  function showNext(){
+    if (idx >= targets.length){
+      finish();
+      return;
+    }
+
+    const file = targets[idx];
+    statusEl.textContent = `Runde {{ player.round_number }}: Muster ${idx+1} / ${targets.length}`;
+
+    imgEl.src = "/static/" + file;
+    imgEl.style.visibility = 'visible';
+
+    log.push({
+      phase: "study",
+      round: {{ player.round_number }},
+      index: idx + 1,
+      file: file,
+      ts_ms: Date.now()
+    });
+
+    setTimeout(() => {
+      imgEl.style.visibility = 'hidden';
+      const isi = randInt(isiMin, isiMax);
+      idx++;
+      setTimeout(showNext, isi);
+    }, stimMs);
+  }
+
+  if (!targets.length){
+    statusEl.textContent = "Keine Stimuli gefunden – weiter…";
+    setTimeout(finish, 300);
+    return;
+  }
+
+  setTimeout(showNext, 600);
+})();
+</script>
+
+{{ endblock }}
