@@ -14,3 +14,5 @@ __pycache__/
 *.py[cod]
 .DS_Store
 *.otreezip_static/global/patterns/
+_static/global/patterns/
+generate_patterns 2.py
