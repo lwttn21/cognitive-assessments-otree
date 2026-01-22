@@ -1,6 +1,7 @@
 # Stop-Signal Task (SST) for oTree
 
 This application implements a  **Stop-Signal Task (SST)**, a cognitive experimental paradigm used to measure inhibitory control and response inhibition.
+It can either be used to induce mental fatigue or to measure mental fatigue.
 
 ## Task Overview
 

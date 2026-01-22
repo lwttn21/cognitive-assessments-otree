@@ -3,15 +3,6 @@
 
 {% block content %}
 
-<!--
-<div id="arrow" style="font-size: 80px; text-align: center; margin-top: 150px; visibility: hidden;">
-    {% if arrow == 'left' %}
-        ←
-    {% else %}
-        →
-    {% endif %}
-</div>
--->
 <style>
 .otree-timer {
     display: none !important;
@@ -39,22 +30,22 @@
 <script>
 let responded = false;
 let startTime = null;
-const stopSignalDelay = 250; // Typischerweise ca. 250ms nach dem Pfeil
+const stopSignalDelay = 250; // typically around 250ms after the arrow
 
 let isStopTrial = {{ stop_signal|json }};
 
-// 1. Pfeil sofort oder nach kurzem Offset anzeigen
+// Show first arrow right after the offset
 window.onload = function() {
     const arrowDiv = document.getElementById('arrow');
 
-    // Pfeil anzeigen
+    // show arrow
     arrowDiv.style.visibility = 'visible';
     startTime = performance.now();
 
-    // 2. Stop Signal erst NACH dem Pfeil (SSD)
+    // second Stop Signal after the arrow (SSD)
     if (isStopTrial) {
         setTimeout(function() {
-            // Nur abspielen, wenn der User noch nicht reagiert hat
+            // Only play if the user has not already reacted
             if (!responded) {
                 document.getElementById('beep').play();
             }
@@ -76,48 +67,9 @@ document.addEventListener('keydown', function(event) {
         rt: rt
     });
 
-    // Optisches Feedback: Pfeil ausblenden nach Tastendruck
+    // Visual feedback: remove arrow after reaction
     document.getElementById('arrow').style.visibility = 'hidden';
 });
 </script>
-
-
-    <!--
-<script>
-let responded = false;
-let startTime = null;
-let stopSignalDelay = 100;   // ms
-
-let isStopTrial = false;
-{% if stop_signal %}
-    isStopTrial = true;
-{% endif %}
-
-
-if (isStopTrial) {
-    document.getElementById('beep').play();
-}
-
-setTimeout(function() {
-    document.getElementById('arrow').style.visibility = 'visible';
-    startTime = performance.now();
-}, isStopTrial ? stopSignalDelay : 0);
-
-
-document.addEventListener('keydown', function(event) {
-    if (responded) return;
-    if (event.key !== 'f' && event.key !== 'j') return;
-    if (startTime === null) return;
-
-    responded = true;
-    let rt = performance.now() - startTime;
-
-    liveSend({
-        key: event.key,
-        rt: rt
-    });
-});
-</script> -->
-
 
 {% endblock %}

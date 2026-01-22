@@ -1,7 +1,6 @@
 from otree.api import *
 import random
 
-
 class C(BaseConstants):
     NAME_IN_URL = 'task_stop_signal'
     PLAYERS_PER_GROUP = None
@@ -11,10 +10,8 @@ class C(BaseConstants):
 class Subsession(BaseSubsession):
     pass
 
-
 class Group(BaseGroup):
     pass
-
 
 class Player(BasePlayer):
     arrow_direction = models.StringField()
@@ -23,7 +20,6 @@ class Player(BasePlayer):
     reaction_time = models.FloatField(blank=True)
     correct = models.BooleanField(null=True)
     phase = models.IntegerField()
-
 
 def creating_session(subsession):
     for player in subsession.get_players():
@@ -42,17 +38,15 @@ class Instructions(Page):
 
 class Phase2Instructions(Page):
     def is_displayed(player):
-        return player.round_number == 17  # Direkt nach Phase 1
+        return player.round_number == 17  #phase 2 instructions get displayed directly after phase 1
 
     def vars_for_template(player):
         return {
             'message': "Ab jetzt können die Beeps erscheinen. Reagiere wie bisher."
         }
 
-
 class MyPage(Page):
     timeout_seconds = 1.5
-   # show_timer = False
 
     def vars_for_template(player):
         return {
@@ -84,26 +78,15 @@ class MyPage(Page):
 
     def before_next_page(player, timeout_happened):
         if player.field_maybe_none('response') is not None:
-            return  # Antwort kam → live_method war zuständig
+            return
 
         if player.stop_signal:
             player.correct = True
         else:
             player.correct = False
 
-    #def before_next_page(player, timeout_happened):
-     #   if timeout_happened:
-      #      if player.stop_signal:
-       #         # Stop-trial + no reaktion = Treu
-        #        player.correct = True
-         #   else:
-          #      # Go-Trial + no reaktion = False
-           #     player.correct = False
-
 class BlankPage(Page):
-    timeout_seconds = 1.0  # Dauer des leeren Screens in Sekunden
-    #show_timer = False
-
+    timeout_seconds = 1.0  #length of showing the empty screen in between
 
 class Results(Page):
     def is_displayed(player):
@@ -115,6 +98,5 @@ class Results(Page):
             'n_trials': len(trials),
             'n_correct': sum(p.correct for p in trials)
         }
-
 
 page_sequence = [Instructions, Phase2Instructions, MyPage, BlankPage, Results]

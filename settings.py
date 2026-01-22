@@ -12,6 +12,12 @@ SESSION_CONFIGS = [
         app_sequence=['task_stop_signal'],
         num_demo_participants=1,
     ),
+
+    dict(
+        name='Task_go_no_go',
+        app_sequence=['task_go_no_go'],
+        num_demo_participants=1,
+    ),
 ]
 
 
