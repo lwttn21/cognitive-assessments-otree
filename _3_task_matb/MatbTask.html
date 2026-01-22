@@ -1,0 +1,92 @@
+{{ block title }} Multi-Attribute Task Battery (MATB-II) {{ endblock }}
+
+{{ block content }}
+<style>
+    #timer-display {
+        text-align: center;
+        font-weight: bold;
+        color: #d9534f;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div id="timer-display" style="display:none;">
+    Remaining Time: <span id="time-left">10:00</span>
+</div>
+
+<input type="hidden" name="sysmon_score" id="sysmonScore" value="0"/>
+<input type="hidden" name="tracking_score" id="trackingScore" value="0"/>
+<input type="hidden" name="comm_score" id="commScore" value="0"/>
+<input type="hidden" name="resman_score" id="resmanScore" value="0"/>
+
+<div class="d-flex justify-content-center">
+    <canvas id="unity-canvas" width=960 height=600 tabindex="-1"
+            style="width: 960px; height: 600px; background: #1F1F20"></canvas>
+</div>
+
+<script src="{% static 'matb/Build/webgl.loader.js' %}"></script>
+<script>
+  let myUnityInstance;
+  let timerStarted = false;
+  const DURATION_SECONDS = 615; // 10 minutes + 15 seconds puffer
+
+  createUnityInstance(document.querySelector("#unity-canvas"), {
+    dataUrl: "{% static 'matb/Build/webgl.data' %}",
+    frameworkUrl: "{% static 'matb/Build/webgl.framework.js' %}",
+    codeUrl: "{% static 'matb/Build/webgl.wasm' %}",
+    companyName: "KIT",
+    productName: "MATB-II",
+  }).then((newUnityInstance) => {
+    myUnityInstance = newUnityInstance;
+  });
+
+  // This function is called by Unity once the app is ready/level is requested
+  function sendDifficultyLevel() {
+    let level = '{{ level_name }}';
+    myUnityInstance.SendMessage('WebBridgeObject', 'SetLevel', level);
+
+    // Start the browser-side timer only now
+    if (!timerStarted) {
+        startTaskTimer(DURATION_SECONDS);
+        timerStarted = true;
+        document.getElementById('timer-display').style.display = 'block';
+    }
+  }
+
+  function startTaskTimer(duration) {
+    let timer = duration, minutes, seconds;
+    const display = document.getElementById('time-left');
+
+    const interval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        display.textContent = minutes + ":" + seconds;
+
+        if (--timer < 0) {
+            clearInterval(interval);
+            quitGameInstance(); // Time expired -> Auto-submit form
+        }
+    }, 1000);
+  }
+
+  function receivePerformanceData(data) {
+    const scores = data.split(";");
+    if(scores.length === 4) {
+      document.getElementById("sysmonScore").value = scores[0];
+      document.getElementById("trackingScore").value = scores[1];
+      document.getElementById("commScore").value = scores[2];
+      document.getElementById("resmanScore").value = scores[3];
+    }
+  }
+
+  function quitGameInstance() {
+    // Submits the page and saves scores to the database
+    document.querySelector('form').submit();
+  }
+</script>
+{{ endblock }}

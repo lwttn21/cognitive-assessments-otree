@@ -1,0 +1,23 @@
+{{ block title }} MATB-II: Your Results {{ endblock }}
+
+{{ block content }}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <p class="lead">Thank you for participating in the MATB-II task.</p>
+        <hr>
+        <h5>Your Subsystem Scores:</h5>
+        <ul>
+            <li>System Monitoring: <strong>{{ player.sysmon_score }}</strong></li>
+            <li>Tracking: <strong>{{ player.tracking_score }}</strong></li>
+            <li>Communications: <strong>{{ player.comm_score }}</strong></li>
+            <li>Resource Management: <strong>{{ player.resman_score }}</strong></li>
+        </ul>
+        <div class="alert alert-info">
+            <strong>Total Performance Score: {{ player.performance_score }}%</strong>
+        </div>
+    </div>
+</div>
+
+<br>
+{{ next_button }}
+{{ endblock }}

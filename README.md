@@ -1,19 +1,16 @@
 # Cognitive Assessment Battery (Mental Fatigue Study)
 
-This repository contains a comprehensive battery of oTree-based cognitive tasks and questionnaires specifically curated to study **Mental Fatigue**.
+This repository contains a comprehensive battery of oTree-based cognitive tasks and questionnaires specifically curated to study **Mental Fatigue**. It features a high-fidelity **MATB-II** simulation for inducing and measuring cognitive load.
 
 ## Background: Mental Fatigue & Cognitive Control
 Mental fatigue is a psychobiological state caused by prolonged periods of demanding cognitive activity. It is characterized by feelings of tiredness and a reduced capacity to sustain cognitive performance.
 
 ### Why this Battery?
+The tests in this repository are designed to quantify how **Mental Fatigue** affects performance. Instead of just measuring subjective "tiredness," these tasks target specific executive functions that degrade under load:
 
-The tests in this repository are designed to show how **Mental Fatigue** affects our brain's performance. Instead of just measuring if someone is "tired," these tasks look at specific areas that break down first when we lose energy:
-
-* **Sticking with a Task:** Tasks like *N-Back* or *Stroom* require a lot of focus. When people get tired, they often "tune out" or stop trying as hard because the mental effort feels too high.
-* **Staying Alert:** Long or repetitive tasks (like *Go/No-Go*) test how well you can pay attention over time. We measure "missed moments" where the brain briefly stops reacting.
-* **Complete Picture:** By combining these hard numbers (like reaction speed) with how the person actually *feels* (self-reports), we get a full picture of their current mental state.
-
-
+* **Executive Control:** Tasks like *N-Back* or *Stroop* require high-level processing. Fatigue often leads to "task disengagement" as the required mental effort becomes too costly.
+* **Sustained Attention:** Long or repetitive tasks (like *Go/No-Go*) test vigilance. We measure "microsleeps" or lapses in attention where the brain fails to react.
+* **Multitasking & Resource Allocation:** Using the **MATB-II**, we can observe how fatigue causes "cognitive tunneling," where participants focus on one task while neglecting others.
 
 ---
 
@@ -21,20 +18,12 @@ The tests in this repository are designed to show how **Mental Fatigue** affects
 
 The apps follow a hierarchical naming convention: `[Category]_[Sub-Category]_[Task_Name]`.
 
-### 1. Objective Performance Tasks
+### 1. Objective Performance Tasks (Assessment)
 | ID | Category | Task | Folder |
 | :--- | :--- | :--- | :--- |
-| **1.1** | **Attention & Speed** | Go/No-Go Task | `_1_1_task_go_no_go` |
-| | | Reaction Time Task (RTI) | `_1_1_task_rti` |
-| | | Rapid Visual Processing (RVP) | `_1_1_task_rvp` |
-| **1.2** | **Executive Function** | Stop Signal Task (SST) | `_1_2_task_stop_signal` |
-| | | Stroop Color-Word Task | `_1_2_task_stroop` |
-| | | Task Switching | `_1_2_task_switching` |
-| | | Trail Making Test A | `_1_2_task_tmt_a` |
-| | | Trail Making Test B | `_1_2_task_tmt_b` |
-| **1.3** | **Memory** | N-Back Task (Working Memory) | `_1_3_task_n_back` |
-| | | Spatial Span (SSP) | `_1_3_task_ssp` |
-| | | Multiple Object Tracking (MOT) | `_1_3_task_mot` |
+| **1.1** | **Attention & Speed** | Go/No-Go / RTI / RVP | `_1_1_task_...` |
+| **1.2** | **Executive Function** | Stroop / Task Switching / TMT A&B | `_1_2_task_...` |
+| **1.3** | **Memory** | N-Back / Spatial Span / MOT | `_1_3_task_...` |
 
 ### 2. Subjective Questionnaires
 | ID | Measure | Description | Folder |
@@ -42,28 +31,29 @@ The apps follow a hierarchical naming convention: `[Category]_[Sub-Category]_[Ta
 | **2.1** | **MFI** | Multidimensional Fatigue Inventory | `_2_survey_mfi` |
 | **2.2** | **VAS** | Visual Analogue Scales (Fatigue/Alertness) | `_2_survey_vas` |
 
+### 3. Complex Multitasking & Fatigue Induction
+| ID | Category | Task | Folder |
+| :--- | :--- | :--- | :--- |
+| **3.1** | **Induction** | **Multi-Attribute Task Battery (MATB-II)** | `_3_task_matb` |
+
 ---
 
 ## Recommended Experimental Design
 
-To effectively measure mental fatigue, this battery is designed to be integrated into a **Pre-Intervention-Post** paradigm. The primary goal is to capture the performance decline (objective) and the increase in perceived exhaustion (subjective) caused by a demanding cognitive task.
+To effectively measure mental fatigue, this battery is designed to be integrated into a **Pre-Intervention-Post** paradigm.
 
 ### Typical Study Workflow
-A standard experimental session using this repository would follow a structured cycle:
-
 1. **Baseline Assessment (Pre-Test)**
    * Subjective state using **VAS** or **MFI**.
-   * Baseline performance on selected cognitive tasks (e.g., **RTI**, **Stroop**, **N-Back**).
-
+   * Baseline performance on selected cognitive tasks.
 2. **Fatigue Induction (Intervention)**
-   * A prolonged period (typically 60–90 minutes) of high cognitive load.
-   * *Example:* Using the **Multi-Attribute Task Battery (MATB-II)** or a simulated high-demand task.
-
+   * **Task:** Use the **MATB-II** module.
+   * **Goal:** A prolonged period (typically 30–60 minutes) of high cognitive load to induce mental fatigue.
 3. **Fatigue Assessment (Post-Test)**
-   * Repetition of subjective scales to measure the change in perceived fatigue.
-   * Repetition of objective tasks to measure the **Time-on-Task (ToT)** effect and performance decrement.
+   * Repetition of subjective scales and objective tasks to measure performance decrement.
 
 ### Visualizing the Cycle
+
 
 
 ```text
@@ -71,10 +61,10 @@ A standard experimental session using this repository would follow a structured 
     |
     v
 +-----------------------+      +-----------------------+      +-----------------------+
-|  PRE-ASSESSMENT       |      |  FATIGUE INDUCTION    |      |  POST-ASSESSMENT      |
-|  (Baseline Metrics)   | ===> |  (e.g., MATB-II)      | ===> |  (Fatigue Metrics)    |
-|  - Subjective Scales  |      |  - 60-90 min duration |      |  - Subjective Scales  |
-|  - Cognitive Tasks    |      |  - High Cognitive Load|      |  - Cognitive Tasks    |
+|  PRE-ASSESSMENT       |      |   FATIGUE INDUCTION   |      |   POST-ASSESSMENT     |
+|  (Baseline Metrics)   | ===> |   (e.g., MATB-II)     | ===> |   (Fatigue Metrics)   |
+|  - Subjective Scales  |      |   - 30-60 min duration|      |   - Subjective Scales |
+|  - Cognitive Tasks    |      |   - High Cognitive Load|      |   - Cognitive Tasks   |
 +-----------------------+      +-----------------------+      +-----------------------+
                                                                          |
                                                                          v

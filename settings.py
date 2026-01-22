@@ -88,11 +88,13 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
     ),
 
+
     dict(
-        name='Task_go_no_go',
-        app_sequence=['task_go_no_go'],
+        name='Task_matb',
+        display_name='3. Matb Task',
+        app_sequence=['_3_task_matb'],
         num_demo_participants=1,
-    ),
+    )
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
