@@ -1,0 +1,44 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Results
+{% endblock %}
+
+{% block content %}
+    <div class="card m-3">
+        <div class="card-body text-center">
+            <h3>Task Completed</h3>
+            <br>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="alert alert-success">
+                        <h4>Correct</h4>
+                        <h2 class="display-4">{{ player.stroop_score }}</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="alert alert-danger">
+                        <h4>Errors</h4>
+                        <h2 class="display-4">{{ player.stroop_errors }}</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="alert alert-info">
+                        <h4>Avg. Speed</h4>
+                        <h2 class="display-4">{{ player.stroop_avg_rt|to0 }} ms</h2>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <p>Click the button below to continue with the experiment.</p>
+        </div>
+    </div>
+
+    <div class="text-center">
+        {% next_button %}
+    </div>
+{% endblock %}

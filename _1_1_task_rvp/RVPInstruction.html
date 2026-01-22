@@ -1,0 +1,53 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Instructions: RVP Task
+{% endblock %}
+
+{% block content %}
+    <div class="card bg-light m-3">
+        <div class="card-body">
+            <h3>Rapid Visual Information Processing</h3>
+            <p>
+                You will see a series of single digits appear in the center of the screen, one after another.
+            </p>
+            <p>
+                Your task is to detect <strong>specific sequences of three numbers</strong>.
+                Press the button <strong>IMMEDIATELY</strong> when you see the <strong>last number</strong> of one of these sequences:
+            </p>
+
+            <div class="row text-center mb-4">
+                <div class="col-md-4">
+                    <div class="alert alert-secondary">
+                        <h5>Sequence A</h5>
+                        <h2>2 - 4 - 6</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="alert alert-secondary">
+                        <h5>Sequence B</h5>
+                        <h2>3 - 5 - 7</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="alert alert-secondary">
+                        <h5>Sequence C</h5>
+                        <h2>4 - 6 - 8</h2>
+                    </div>
+                </div>
+            </div>
+
+            <p>
+                <strong>Example:</strong><br>
+                If you see: <code>9 ... 2 ... 4 ... 6</code> <br>
+                You press the button as soon as the <strong>6</strong> appears.
+            </p>
+
+            <p>Please try to be as fast and accurate as possible.</p>
+        </div>
+    </div>
+
+    <div class="text-center">
+        {% next_button %}
+    </div>
+{% endblock %}

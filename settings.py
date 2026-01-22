@@ -1,15 +1,90 @@
 from os import environ
 
+# =============================================================================
+# COGNITIVE ASSESSMENT BATTERY - MENTAL FATIGUE STUDY
+#
+# Structure:
+# 1.x - Objective Cognitive Tasks (Performance-based metrics)
+# 2.x - Subjective Questionnaires (Self-report measures)
+# =============================================================================
+
 SESSION_CONFIGS = [
     dict(
-        name='Task_Go_No_Go',
-        app_sequence=['task_go_no_go'],
+        name='session_Go_No_Go',
+        display_name="1.1 Go No Go Task",
+        app_sequence=['_1_1_task_go_no_go'],
         num_demo_participants=1,
     ),
-
     dict(
-        name='Task_stop_signal',
-        app_sequence=['task_stop_signal'],
+        name="session_rti",
+        display_name="1.1 Reaction Time Task",
+        app_sequence=['_1_1_task_rti'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_rvp",
+        display_name="1.1 Rapid Visual Information Processing Task",
+        app_sequence=['_1_1_task_rvp'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name='session_stop_signal',
+        display_name="1.2 Stop Signal Task",
+        app_sequence=['_1_2_task_stop_signal'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_stroop",
+        display_name="1.2 Stroop Task",
+        app_sequence=['_1_2_task_stroop'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_switching",
+        display_name="1.2 Switching Task",
+        app_sequence=['_1_2_task_switching'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_tmt_a",
+        display_name="1.2 Trail Making Test A",
+        app_sequence=['_1_2_task_tmt_a'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_tmt_b",
+        display_name="1.2 Trail Making Test B",
+        app_sequence=['_1_2_task_tmt_b'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_mot",
+        display_name="1.3 Motor Screening Task",
+        app_sequence=['_1_3_task_mot'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_n_back",
+        display_name="1.3 N-Back Task",
+        app_sequence=['_1_3_task_n_back'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_ssp",
+        display_name="1.3 Spatial Span Task",
+        app_sequence=['_1_3_task_ssp'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_survey_mfi",
+        display_name="2. Multidimensional Fatigue Inventory Survey",
+        app_sequence=['_2_survey_mfi'],
+        num_demo_participants=1,
+    ),
+    dict(
+        name="session_survey_vas",
+        display_name="2. Visual Analogue Scale Survey",
+        app_sequence=['_2_survey_vas'],
         num_demo_participants=1,
     ),
 
@@ -19,8 +94,6 @@ SESSION_CONFIGS = [
         num_demo_participants=1,
     ),
 ]
-
-
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.

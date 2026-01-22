@@ -1,0 +1,197 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Questionnaire
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* --- Container Styling --- */
+    .survey-box {
+        border: 1px solid #e0e0e0;
+        padding: 30px;
+        background-color: #fafafa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .question-item {
+        margin-bottom: 40px;
+    }
+
+    .question-item:last-child {
+        margin-bottom: 10px;
+    }
+
+    .question-label {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+        display: block;
+        color: #333;
+    }
+
+    /* --- Slider Grid Layout --- */
+    .vas-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .anchor-label {
+        font-size: 0.9rem;
+        color: #666;
+        white-space: nowrap;
+        width: 80px;
+    }
+
+    .anchor-left { text-align: right; }
+    .anchor-right { text-align: left; }
+
+    /* --- Range Input Styling --- */
+    .slider-wrapper {
+        flex-grow: 1;
+        position: relative;
+        height: 30px;
+        display: flex;
+        align-items: center;
+    }
+
+    input[type=range] {
+        -webkit-appearance: none;
+        width: 100%;
+        background: transparent;
+    }
+
+    input[type=range]:focus {
+        outline: none;
+    }
+
+    /* Webkit (Chrome, Safari, Edge) Track */
+    input[type=range]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        background: #dee2e6;
+        border-radius: 3px;
+        border: 1px solid #ced4da;
+    }
+
+    /* Webkit Thumb (Handle) */
+    input[type=range]::-webkit-slider-thumb {
+        height: 24px;
+        width: 24px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -10px; /* Centers thumb on track */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        transition: background 0.15s, transform 0.15s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+        background: #0056b3;
+        transform: scale(1.1);
+    }
+
+    /* Mozilla (Firefox) Track */
+    input[type=range]::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        background: #dee2e6;
+        border-radius: 3px;
+        border: 1px solid #ced4da;
+    }
+
+    /* Mozilla Thumb */
+    input[type=range]::-moz-range-thumb {
+        height: 24px;
+        width: 24px;
+        border: none;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 500px) {
+        .vas-container {
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .slider-wrapper {
+            width: 100%;
+            order: 3; /* Move slider below labels */
+            margin-top: 5px;
+        }
+        .anchor-left { order: 1; text-align: left; }
+        .anchor-right { order: 2; text-align: right; }
+    }
+</style>
+
+<div class="survey-box">
+
+    <div class="question-item">
+        <label class="question-label" for="mf_slider">
+            How mentally fatigued do you feel right now?
+        </label>
+        <div class="vas-container">
+            <span class="anchor-label anchor-left">Not at all</span>
+            <div class="slider-wrapper">
+                <input type="range" name="mental_fatigue" id="mf_slider" min="0" max="100" step="1">
+            </div>
+            <span class="anchor-label anchor-right">Very much</span>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <label class="question-label" for="mo_slider">
+            How motivated do you feel right now?
+        </label>
+        <div class="vas-container">
+            <span class="anchor-label anchor-left">Not at all</span>
+            <div class="slider-wrapper">
+                <input type="range" name="motivation" id="mo_slider" min="0" max="100" step="1">
+            </div>
+            <span class="anchor-label anchor-right">Very much</span>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <label class="question-label" for="mw_slider">
+            How mentally demanded do you feel right now?
+        </label>
+        <div class="vas-container">
+            <span class="anchor-label anchor-left">Not at all</span>
+            <div class="slider-wrapper">
+                <input type="range" name="mental_workload" id="mw_slider" min="0" max="100" step="1">
+            </div>
+            <span class="anchor-label anchor-right">Very much</span>
+        </div>
+    </div>
+
+    <div class="question-item">
+        <label class="question-label" for="fr_slider">
+            How frustrated do you feel right now?
+        </label>
+        <div class="vas-container">
+            <span class="anchor-label anchor-left">Not at all</span>
+            <div class="slider-wrapper">
+                <input type="range" name="frustration" id="fr_slider" min="0" max="100" step="1">
+            </div>
+            <span class="anchor-label anchor-right">Very much</span>
+        </div>
+    </div>
+
+</div>
+
+<div class="text-center">
+    <button class="btn btn-primary btn-lg">Next</button>
+</div>
+
+{% endblock %}

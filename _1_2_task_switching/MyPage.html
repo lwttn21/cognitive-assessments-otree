@@ -1,0 +1,61 @@
+{{ block content }}
+    <div class="task-container" style="position: relative; height: 500px; border: 2px solid #333; background: #f9f9f9; overflow: hidden;">
+        <div style="position: absolute; top: 50%; width: 100%; border-top: 1px dashed #ccc;"></div>
+
+        <div id="stimulus" style="position: absolute; font-size: 80px; display: block;">
+            {{ if stimulus_direction == 'left' }} &#11013; {{ else }} &#10145; {{ endif }}
+        </div>
+    </div>
+
+    <input type="hidden" name="response" id="response" value="">
+    <input type="hidden" name="reaction_time" id="reaction_time" value="">
+
+    <style>
+        #stimulus {
+            top: {{ if rule == 'LOCATION' }} 25% {{ else }} 75% {{ endif }};
+            left: {{ if stimulus_side == 'left' }} 25% {{ else }} 75% {{ endif }};
+            transform: translate(-50%, -50%);
+        }
+    </style>
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+    let startTime = Date.now();
+    let hasResponded = false;
+    let duration = js_vars.stimulus_duration;
+
+    function finishTrial(val) {
+        if (hasResponded) return;
+        hasResponded = true;
+
+        // Pfeil sofort verstecken, um erneutes Anzeigen zu verhindern
+        const stim = document.getElementById('stimulus');
+        if (stim) stim.style.display = 'none';
+
+        document.getElementById('response').value = val;
+        document.getElementById('reaction_time').value = Date.now() - startTime;
+
+        // Formular absenden ohne oTree-Validierungsprobleme
+        document.getElementById('form').submit();
+    }
+
+    // Timer für den automatischen Durchlauf
+    if (duration && duration > 0) {
+        setTimeout(function() {
+            if (!hasResponded) {
+                finishTrial(""); // Sendet leere Antwort
+            }
+        }, duration);
+    }
+
+    // Tastatur-Steuerung (Arrow Keys)
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            event.preventDefault();
+            let responseValue = (event.key === 'ArrowLeft') ? 'left' : 'right';
+            finishTrial(responseValue);
+        }
+    });
+</script>
+{{ endblock }}

@@ -1,0 +1,44 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Instructions: Color-Word Test
+{% endblock %}
+
+{% block content %}
+    <div class="card bg-light m-3">
+        <div class="card-body">
+            <h3>Your Task</h3>
+            <p>
+                You will see words appear on the screen one by one.
+                The words themselves will be names of colors (e.g., "RED", "BLUE").
+            </p>
+            <p>
+                <strong>However, the words will be printed in colored ink.</strong>
+            </p>
+
+            <div class="alert alert-primary text-center">
+                <h5>Your goal is to select the <u>COLOR OF THE INK</u>!</h5>
+                <p>Ignore the meaning of the word itself.</p>
+            </div>
+
+            <hr>
+            <p><strong>Example:</strong></p>
+            <div style="text-align: center; font-size: 20px; margin-bottom: 20px; border: 1px solid #ccc; padding: 20px; border-radius: 8px;">
+                If you see: <span style="color: #008000; font-weight: bold; font-size: 40px;">RED</span>
+                <br><br>
+                You must click: <button class="btn btn-outline-secondary" disabled>GREEN</button>
+                <br>
+                <small class="text-muted">(Because the ink is green, even though the word says "RED")</small>
+            </div>
+            <hr>
+
+            <p>
+                Please try to answer as fast and as accurately as possible.
+            </p>
+        </div>
+    </div>
+
+    <div class="text-center">
+        {% next_button %}
+    </div>
+{% endblock %}

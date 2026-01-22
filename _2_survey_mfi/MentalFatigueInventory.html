@@ -1,0 +1,189 @@
+{% extends 'otree/Page.html' %}
+
+{% block title %}
+    Questionnaire
+{% endblock %}
+
+{% block content %}
+
+<style>
+    /* --- Styling for the Questionnaire Box --- */
+    .survey-box {
+        border: 1px solid #e0e0e0;
+        padding: 25px;
+        background-color: #fafafa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .question-row {
+        margin-bottom: 40px; /* Space between questions */
+        border-bottom: 1px dashed #ccc;
+        padding-bottom: 20px;
+    }
+
+    .question-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .question-text {
+        font-weight: 600;
+        font-size: 1.1em;
+        margin-bottom: 20px;
+        display: block;
+        color: #333;
+    }
+
+    /* --- Grid Layout for the Slider Section --- */
+    .slider-container {
+        display: grid;
+        grid-template-columns: 1fr 4fr 1fr; /* Left Label - Slider - Right Label */
+        align-items: center;
+        gap: 15px;
+    }
+
+    /* Anchor labels (Not true / True) */
+    .anchor-text {
+        font-size: 0.85em;
+        color: #666;
+        line-height: 1.2;
+    }
+    .anchor-left { text-align: right; }
+    .anchor-right { text-align: left; }
+
+    /* --- Slider Control Styling --- */
+    .range-wrapper {
+        position: relative;
+        padding-top: 5px;
+        padding-bottom: 25px; /* Space for numbers below slider */
+    }
+
+    input[type=range] {
+        width: 100%;
+        cursor: pointer;
+    }
+
+    /* Numbers (-3 to 3) below the slider */
+    .slider-scale-numbers {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 0.8em;
+        color: #888;
+        padding: 0 2px;
+    }
+
+    /* Responsive adjustment for mobile screens */
+    @media (max-width: 600px) {
+        .slider-container {
+            grid-template-columns: 1fr; /* Stack vertically on small screens */
+            text-align: center;
+        }
+        .anchor-left, .anchor-right {
+            text-align: center;
+            font-weight: bold;
+        }
+    }
+</style>
+
+<div class="survey-box">
+    <p class="lead text-center" style="margin-bottom: 30px; font-size: 1rem;">
+        Please indicate to what extent the following statements apply to you <strong>right now</strong>.
+    </p>
+
+    <div class="question-row">
+        <span class="question-text">1. I feel fit</span>
+        <div class="slider-container">
+            <div class="anchor-text anchor-left">No, that is not true</div>
+            <div class="range-wrapper">
+                <input type="range" min="-3" max="3" step="1" id="slider_mfi_1" oninput="updateInput('mfi_1')">
+                <div class="slider-scale-numbers">
+                    <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>1</span><span>2</span><span>3</span>
+                </div>
+            </div>
+            <div class="anchor-text anchor-right">Yes, that is true</div>
+        </div>
+    </div>
+
+    <div class="question-row">
+        <span class="question-text">2. I feel tired</span>
+        <div class="slider-container">
+            <div class="anchor-text anchor-left">No, that is not true</div>
+            <div class="range-wrapper">
+                <input type="range" min="-3" max="3" step="1" id="slider_mfi_2" oninput="updateInput('mfi_2')">
+                <div class="slider-scale-numbers">
+                    <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>1</span><span>2</span><span>3</span>
+                </div>
+            </div>
+            <div class="anchor-text anchor-right">Yes, that is true</div>
+        </div>
+    </div>
+
+    <div class="question-row">
+        <span class="question-text">3. I have a lot of energy</span>
+        <div class="slider-container">
+            <div class="anchor-text anchor-left">No, that is not true</div>
+            <div class="range-wrapper">
+                <input type="range" min="-3" max="3" step="1" id="slider_mfi_3" oninput="updateInput('mfi_3')">
+                <div class="slider-scale-numbers">
+                    <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>1</span><span>2</span><span>3</span>
+                </div>
+            </div>
+            <div class="anchor-text anchor-right">Yes, that is true</div>
+        </div>
+    </div>
+
+    <div class="question-row">
+        <span class="question-text">4. I feel exhausted</span>
+        <div class="slider-container">
+            <div class="anchor-text anchor-left">No, that is not true</div>
+            <div class="range-wrapper">
+                <input type="range" min="-3" max="3" step="1" id="slider_mfi_4" oninput="updateInput('mfi_4')">
+                <div class="slider-scale-numbers">
+                    <span>-3</span><span>-2</span><span>-1</span><span>0</span><span>1</span><span>2</span><span>3</span>
+                </div>
+            </div>
+            <div class="anchor-text anchor-right">Yes, that is true</div>
+        </div>
+    </div>
+
+</div>
+
+<input type="hidden" name="mfi_1" id="hidden_mfi_1">
+<input type="hidden" name="mfi_2" id="hidden_mfi_2">
+<input type="hidden" name="mfi_3" id="hidden_mfi_3">
+<input type="hidden" name="mfi_4" id="hidden_mfi_4">
+
+<div class="text-center">
+    <button class="btn btn-primary btn-lg">Next</button>
+</div>
+
+<script>
+    /**
+     * Updates the hidden input field when the user moves the slider.
+     * @param {string} fieldName - The name of the field (e.g., 'mfi_1')
+     */
+    function updateInput(fieldName) {
+        var slider = document.getElementById("slider_" + fieldName);
+        var hiddenInput = document.getElementById("hidden_" + fieldName);
+        hiddenInput.value = slider.value;
+    }
+
+    // Initialize all sliders and hidden inputs on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        var fields = ['mfi_1', 'mfi_2', 'mfi_3', 'mfi_4'];
+
+        fields.forEach(function(field) {
+            var slider = document.getElementById("slider_" + field);
+            var hiddenInput = document.getElementById("hidden_" + field);
+
+            // Initialize at 0 (Neutral)
+            slider.value = 0;
+            hiddenInput.value = 0;
+        });
+    });
+</script>
+
+{% endblock %}

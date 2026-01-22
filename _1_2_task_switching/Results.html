@@ -1,0 +1,24 @@
+{{ block title }}Results{{ endblock }}
+{{ block content }}
+
+    <table class="table">
+        <tr>
+            <td>Total Correct:</td>
+            <td>{{ total_correct }}</td>
+        </tr>
+        <tr>
+            <td>Total Errors:</td>
+            <td>{{ total_errors }} (Location: {{ err_loc }}, Direction: {{ err_dir }})</td>
+        </tr>
+        <tr>
+            <td>Accuracy:</td>
+            <td>{{ accuracy }} %</td>
+        </tr>
+        <tr>
+            <td>Mean Reaction Time:</td>
+            <td>{{ mean_rt }} ms</td>
+        </tr>
+    </table>
+
+    {{ next_button }}
+{{ endblock }}
