@@ -5,12 +5,13 @@ This repository contains a comprehensive battery of oTree-based cognitive tasks 
 ## Background: Mental Fatigue & Cognitive Control
 Mental fatigue is a psychobiological state caused by prolonged periods of demanding cognitive activity. It is characterized by feelings of tiredness and a reduced capacity to sustain cognitive performance.
 
-### The Logic of this Battery
-The tests in this repository are designed to target specific components of **Cognitive Control** that are highly sensitive to fatigue:
+### Why this Battery?
 
-* **Sensitivity to Effort:** Tasks like *N-Back* or *Stroop* require high executive demand. Fatigued individuals often show a "disengagement" effect, where performance drops as cognitive resources are depleted.
-* **Vigilance & Omission:** Long-duration tasks (e.g., *RVP* or *Go/No-Go*) measure the ability to maintain attention over time.
-* **Dual-Taxonomy:** By combining **objective performance metrics** with **subjective self-reports**, this battery allows for a holistic analysis of the participant's state.
+The tests in this repository are designed to show how **Mental Fatigue** affects our brain's performance. Instead of just measuring if someone is "tired," these tasks look at specific areas that break down first when we lose energy:
+
+* **Sticking with a Task:** Tasks like *N-Back* or *Stroom* require a lot of focus. When people get tired, they often "tune out" or stop trying as hard because the mental effort feels too high.
+* **Staying Alert:** Long or repetitive tasks (like *Go/No-Go*) test how well you can pay attention over time. We measure "missed moments" where the brain briefly stops reacting.
+* **Complete Picture:** By combining these hard numbers (like reaction speed) with how the person actually *feels* (self-reports), we get a full picture of their current mental state.
 
 
 
