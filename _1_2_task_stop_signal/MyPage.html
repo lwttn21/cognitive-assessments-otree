@@ -30,19 +30,18 @@
 <script>
 let responded = false;
 let startTime = null;
-const stopSignalDelay = 250; // Typischerweise ca. 250ms nach dem Pfeil
+const stopSignalDelay = 200; // Time between arrow and beep
 
 let isStopTrial = {{ stop_signal|json }};
 
-// 1. Pfeil sofort oder nach kurzem Offset anzeigen
 window.onload = function() {
     const arrowDiv = document.getElementById('arrow');
 
-    // Pfeil anzeigen
+    // Display the stimulus (arrow) and record the exact onset time
     arrowDiv.style.visibility = 'visible';
     startTime = performance.now();
 
-    // 2. Stop Signal erst NACH dem Pfeil (SSD)
+    // Handle Stop-Signal logic
     if (isStopTrial) {
         setTimeout(function() {
             // Nur abspielen, wenn der User noch nicht reagiert hat
@@ -67,7 +66,7 @@ document.addEventListener('keydown', function(event) {
         rt: rt
     });
 
-    // Optisches Feedback: Pfeil ausblenden nach Tastendruck
+    // Visual feedback: remove arrow after reaction
     document.getElementById('arrow').style.visibility = 'hidden';
 });
 </script>

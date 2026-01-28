@@ -42,7 +42,7 @@ class Phase2Instructions(Page):
 
     def vars_for_template(player):
         return {
-            'message': "Ab jetzt können die Beeps erscheinen. Reagiere wie bisher."
+            'message': "From now on you can here the beeps. React as up until now."
         }
 
 class MyPage(Page):
