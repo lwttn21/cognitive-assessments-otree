@@ -3,15 +3,6 @@
 
 {% block content %}
 
-<!--
-<div id="arrow" style="font-size: 80px; text-align: center; margin-top: 150px; visibility: hidden;">
-    {% if arrow == 'left' %}
-        ←
-    {% else %}
-        →
-    {% endif %}
-</div>
--->
 <style>
 .otree-timer {
     display: none !important;
@@ -80,44 +71,6 @@ document.addEventListener('keydown', function(event) {
     document.getElementById('arrow').style.visibility = 'hidden';
 });
 </script>
-
-
-    <!--
-<script>
-let responded = false;
-let startTime = null;
-let stopSignalDelay = 100;   // ms
-
-let isStopTrial = false;
-{% if stop_signal %}
-    isStopTrial = true;
-{% endif %}
-
-
-if (isStopTrial) {
-    document.getElementById('beep').play();
-}
-
-setTimeout(function() {
-    document.getElementById('arrow').style.visibility = 'visible';
-    startTime = performance.now();
-}, isStopTrial ? stopSignalDelay : 0);
-
-
-document.addEventListener('keydown', function(event) {
-    if (responded) return;
-    if (event.key !== 'f' && event.key !== 'j') return;
-    if (startTime === null) return;
-
-    responded = true;
-    let rt = performance.now() - startTime;
-
-    liveSend({
-        key: event.key,
-        rt: rt
-    });
-});
-</script> -->
 
 
 {% endblock %}
