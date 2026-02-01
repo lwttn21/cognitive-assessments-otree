@@ -44,7 +44,6 @@ window.onload = function() {
     // Handle Stop-Signal logic
     if (isStopTrial) {
         setTimeout(function() {
-            // Nur abspielen, wenn der User noch nicht reagiert hat
             if (!responded) {
                 document.getElementById('beep').play();
             }
